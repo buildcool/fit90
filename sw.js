@@ -1,4 +1,4 @@
-const CACHE_NAME = "apt-tracker-v4";
+const CACHE_NAME = "apt-tracker-v5";
 const ASSETS = [
   "./",
   "./index.html",
@@ -32,7 +32,7 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-/* App files are precached above. Exercise photos (5.6 MB) are not — each is
+/* App files are precached above. Exercise photos (~5 MB, plus 4 KB list thumbnails) are not — each is
    cached the first time it is viewed, so a phone only stores the ones used,
    and they keep working with no signal in the gym afterwards. */
 self.addEventListener("fetch", (event) => {

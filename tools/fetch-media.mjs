@@ -13,6 +13,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 
 const root = path.resolve(import.meta.dirname, "..");
 const RAW = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main";
@@ -76,6 +77,22 @@ const BY_EXERCISE = {
   d5e8: "Hammer_Curls"               // the superset leads with hammer curls
 };
 
+/* ImageMagick (pkg install imagemagick) shrinks the photos: full photos to
+   720px wide for the viewer, 160px thumbnails for the exercise list. Without
+   it the originals are used as-is. Both steps are idempotent. */
+let MAGICK = null;
+try { execFileSync("magick", ["-version"], { stdio: "ignore" }); MAGICK = "magick"; } catch { /* optional */ }
+const THUMB_DIR = path.join(OUT_DIR, "thumb");
+function optimise(file) {
+  if (!MAGICK) return;
+  const w = Number(execFileSync(MAGICK, ["identify", "-format", "%w", file]).toString());
+  if (w > 720) execFileSync(MAGICK, [file, "-resize", "720x", "-strip", "-interlace", "Plane", "-quality", "74", file]);
+}
+function thumbnail(src, dest) {
+  if (!MAGICK || fs.existsSync(dest)) return;
+  execFileSync(MAGICK, [src, "-resize", "160x120^", "-gravity", "center", "-extent", "160x120", "-strip", "-quality", "70", dest]);
+}
+
 const db = await (await fetch(`${RAW}/dist/exercises.json`)).json();
 const byId = Object.fromEntries(db.map(e => [e.id, e]));
 
@@ -87,6 +104,7 @@ if (missing.length) {
 }
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
+fs.mkdirSync(THUMB_DIR, { recursive: true });
 
 const media = {};
 let bytes = 0, fetched = 0, cached = 0;
@@ -106,13 +124,19 @@ for (const id of wanted) {
     } else {
       cached++;
     }
+    optimise(dest);
     bytes += fs.statSync(dest).size;
     files.push(`img/ex/${name}`);
   }
+  const thumbName = `${id}.jpg`;
+  thumbnail(path.join(OUT_DIR, `${id}-${files.length > 1 ? 1 : 0}.jpg`), path.join(THUMB_DIR, thumbName));
+  const thumb = fs.existsSync(path.join(THUMB_DIR, thumbName)) ? `img/ex/thumb/${thumbName}` : files[files.length - 1];
+  if (thumb.includes("/thumb/")) bytes += fs.statSync(path.join(THUMB_DIR, thumbName)).size;
   media[id] = {
     name: e.name,
     start: files[0],
     finish: files[1] || files[0],
+    thumb,
     primary: e.primaryMuscles || [],
     secondary: e.secondaryMuscles || []
   };

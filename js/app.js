@@ -247,7 +247,7 @@ function exerciseCard(ex, t) {
 function cardThumb(ex) {
   const m = getExerciseMedia(ex);
   return m
-    ? `<img src="${m.finish}" alt="" loading="lazy" class="w-full h-full object-cover" onerror="this.outerHTML=''" />`
+    ? `<img src="${m.thumb || m.finish}" alt="" loading="lazy" class="w-full h-full object-cover" onerror="this.outerHTML=''" />`
     : thumbExercise(ex);
 }
 

@@ -62,28 +62,85 @@ function joints(p) {
   return { pelvis, shoulder, neckTop, headC, elbow, wrist, elbowB, wristB, knee, ankle, toe, kneeB, ankleB, toeB };
 }
 
-/* The lumbar spine, drawn as a curve whose bend is driven by pelvis tilt.
-   This is what makes an arched lower back visible instead of merely stated. */
-function spine(j, p, bad) {
+/* The torso is drawn along a curved centreline whose bend is driven by pelvis
+   tilt, not as a straight tube. An anterior tilt bows the lumbar spine toward
+   the belly, so the figure shows what APT actually looks like from the side:
+   hollow lower back, belly pushed forward, glutes pushed back. A posterior
+   tilt (or a rounded back) bends it the other way.
+
+   `prone` flips which side is the belly, for face-down and all-fours poses. */
+function torsoGeometry(j, p, prone) {
+  const P = j.pelvis, S = j.shoulder;
+  const a = Math.atan2(S.y - P.y, S.x - P.x);
+  const f = prone ? -1 : 1;
+  const nx = -Math.sin(a) * f, ny = Math.cos(a) * f;          // unit normal toward the belly
+  const bend = (p.tilt || 0) * 0.9;
+  const c = { x: (P.x + S.x) / 2 + nx * bend, y: (P.y + S.y) / 2 + ny * bend };
+  const at = t => ({
+    x: (1 - t) * (1 - t) * P.x + 2 * (1 - t) * t * c.x + t * t * S.x,
+    y: (1 - t) * (1 - t) * P.y + 2 * (1 - t) * t * c.y + t * t * S.y
+  });
+  const tangent = t => ({
+    x: 2 * (1 - t) * (c.x - P.x) + 2 * t * (S.x - c.x),
+    y: 2 * (1 - t) * (c.y - P.y) + 2 * t * (S.y - c.y)
+  });
+  /* belly side: the local normal that points the same way as (nx, ny) */
+  const normal = t => {
+    const d = tangent(t), L = Math.hypot(d.x, d.y) || 1;
+    let mx = -d.y / L, my = d.x / L;
+    if (mx * nx + my * ny < 0) { mx = -mx; my = -my; }
+    return { x: mx, y: my };
+  };
+  return { at, normal, nx, ny };
+}
+
+function torsoShape(j, p, opts, fill, edge) {
+  const g = torsoGeometry(j, p, opts.prone);
   const tilt = p.tilt || 0;
-  const mx = (j.pelvis.x + j.shoulder.x) / 2, my = (j.pelvis.y + j.shoulder.y) / 2;
-  const a = Math.atan2(j.shoulder.y - j.pelvis.y, j.shoulder.x - j.pelvis.x);
-  const bend = tilt * 0.85;
-  const cx = mx - Math.sin(a) * bend, cy = my + Math.cos(a) * bend;
-  return `<path d="M${j.pelvis.x.toFixed(1)},${j.pelvis.y.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${j.shoulder.x.toFixed(1)},${j.shoulder.y.toFixed(1)}"
-    fill="none" stroke="${bad ? C.spineBad : C.spineOk}" stroke-width="3" stroke-linecap="round" opacity="0.95"/>`;
+  const N = 14, front = [], back = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, c = g.at(t), n = g.normal(t);
+    // belly pushes out with an anterior tilt, in the lower half of the torso
+    const belly = Math.max(0, tilt) * 0.16 * Math.sin(Math.PI * Math.min(1, t * 1.6));
+    const wf = 10.5 + 2.5 * t + belly, wb = 10.5 + 2.5 * t;
+    front.push([c.x + n.x * wf, c.y + n.y * wf]);
+    back.push([c.x - n.x * wb, c.y - n.y * wb]);
+  }
+  const pts = front.concat(back.reverse()).map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  // glutes sit behind the pelvis and push further back as the pelvis tips forward
+  const n0 = g.normal(0), push = 8 + tilt * 0.35;
+  const gl = { x: j.pelvis.x - n0.x * push, y: j.pelvis.y - n0.y * push };
+  return `<circle cx="${gl.x.toFixed(1)}" cy="${gl.y.toFixed(1)}" r="9.5" fill="${fill}" stroke="${edge}" stroke-width="1"/>`
+    + `<polygon points="${pts}" fill="${fill}" stroke="${edge}" stroke-width="1" stroke-linejoin="round"/>`;
 }
 
-/* The pelvis itself — a wedge that visibly rotates with `tilt`. */
-function pelvisPlate(j, p, fill, edge) {
-  const a = (p.torso + 90) + (p.tilt || 0);
-  const f = px(j.pelvis, a, SEG.pelvisW / 2);
-  const b = px(j.pelvis, a + 180, SEG.pelvisW / 2);
-  return limb(b, f, 8, 10, fill, edge)
-    + `<circle cx="${f.x.toFixed(1)}" cy="${f.y.toFixed(1)}" r="2.6" fill="${C.accent}"/>`;
+/* The lower back line — the contour to look at. Thick and coloured so an
+   arch or a rounded back reads at a glance. */
+function lowerBackLine(j, p, opts) {
+  const g = torsoGeometry(j, p, opts.prone);
+  const pts = [];
+  for (let i = 0; i <= 10; i++) {
+    const t = 0.04 + (i / 10) * 0.6, c = g.at(t), n = g.normal(t);
+    const w = 10.5 + 2.5 * t;
+    pts.push(`${(c.x - n.x * w).toFixed(1)},${(c.y - n.y * w).toFixed(1)}`);
+  }
+  return `<polyline points="${pts.join(" ")}" fill="none" stroke="${opts.bad ? "#fde047" : "#ecfdf5"}"
+    stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>`;
 }
 
-/* Full figure. */
+/* The pelvis itself — a wedge that visibly rotates with `tilt`, with the
+   front hip bone (ASIS) marked. */
+function pelvisPlate(j, p, opts, fill, edge) {
+  const f = opts.prone ? -1 : 1;
+  const a = p.torso + 90 * f + (p.tilt || 0) * f;
+  const fr = px(j.pelvis, a, SEG.pelvisW / 2);
+  const bk = px(j.pelvis, a + 180, SEG.pelvisW / 2);
+  return `<line x1="${bk.x.toFixed(1)}" y1="${bk.y.toFixed(1)}" x2="${fr.x.toFixed(1)}" y2="${fr.y.toFixed(1)}"
+      stroke="${edge}" stroke-width="2.4" stroke-linecap="round" opacity="0.8"/>`
+    + `<circle cx="${fr.x.toFixed(1)}" cy="${fr.y.toFixed(1)}" r="2.8" fill="${C.accent}"/>`;
+}
+
+/* Full figure. opts: { bad, prone, showHands } */
 function figure(p, opts = {}) {
   const bad = !!opts.bad;
   const fill = bad ? C.badFill : C.bodyFill;
@@ -94,10 +151,10 @@ function figure(p, opts = {}) {
   // far limbs first, in a darker shade, so the figure reads with depth
   s += limb(j.pelvis, j.kneeB, 8, 6, back, back) + limb(j.kneeB, j.ankleB, 6, 4, back, back) + limb(j.ankleB, j.toeB, 4, 3, back, back);
   s += limb(j.shoulder, j.elbowB, 6, 5, back, back) + limb(j.elbowB, j.wristB, 5, 3.5, back, back);
-  // torso + pelvis
-  s += limb(j.pelvis, j.shoulder, 11, 13, fill, edge);
-  s += pelvisPlate(j, p, fill, edge);
-  s += spine(j, p, bad);
+  // torso, pelvis, and the lower-back line
+  s += torsoShape(j, p, opts, fill, edge);
+  s += pelvisPlate(j, p, opts, fill, edge);
+  s += lowerBackLine(j, p, opts);
   // near limbs
   s += limb(j.pelvis, j.knee, 9, 6.5, fill, edge) + limb(j.knee, j.ankle, 6.5, 4.5, fill, edge) + limb(j.ankle, j.toe, 4.5, 3, fill, edge);
   s += limb(j.shoulder, j.elbow, 6.5, 5.5, fill, edge) + limb(j.elbow, j.wrist, 5.5, 4, fill, edge);
@@ -132,6 +189,21 @@ const MACHINES = {
   benchBehind: () => `<rect x="158" y="112" width="98" height="11" rx="5" fill="${C.pad}" stroke="${C.machine}" stroke-width="1.5"/>
     <line x1="172" y1="123" x2="172" y2="175" stroke="${C.machine}" stroke-width="5"/>
     <line x1="242" y1="123" x2="242" y2="175" stroke="${C.machine}" stroke-width="5"/>
+    <line x1="10" y1="175" x2="310" y2="175" stroke="${C.floor}" stroke-width="4"/>`,
+
+  legPressSeat: () => `<line x1="118" y1="160" x2="246" y2="108" stroke="${C.machine}" stroke-width="5" stroke-linecap="round"/>
+    <rect x="70" y="140" width="56" height="10" rx="4" fill="${C.pad}" stroke="${C.machine}" stroke-width="1.5"/>
+    <line x1="96" y1="143" x2="60" y2="96" stroke="${C.pad}" stroke-width="13" stroke-linecap="round"/>
+    <line x1="96" y1="143" x2="60" y2="96" stroke="${C.machine}" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="98" y1="150" x2="98" y2="175" stroke="${C.machine}" stroke-width="5"/>
+    <line x1="10" y1="175" x2="310" y2="175" stroke="${C.floor}" stroke-width="4"/>`,
+
+  benchLow: () => `<rect x="88" y="136" width="116" height="10" rx="4" fill="${C.pad}" stroke="${C.machine}" stroke-width="1.5"/>
+    <line x1="102" y1="146" x2="102" y2="175" stroke="${C.machine}" stroke-width="5"/>
+    <line x1="190" y1="146" x2="190" y2="175" stroke="${C.machine}" stroke-width="5"/>
+    <line x1="10" y1="175" x2="310" y2="175" stroke="${C.floor}" stroke-width="4"/>`,
+
+  rollerBack: () => `<circle cx="180" cy="166" r="9" fill="${C.machineDark}" stroke="${C.machineLight}" stroke-width="2"/>
     <line x1="10" y1="175" x2="310" y2="175" stroke="${C.floor}" stroke-width="4"/>`,
 
   benchIncline: () => `<rect x="70" y="100" width="130" height="11" rx="5" fill="${C.pad}" stroke="${C.machine}" stroke-width="1.5" transform="rotate(-18 135 105)"/>
@@ -202,9 +274,9 @@ const MACHINES = {
     <line x1="128" y1="150" x2="128" y2="175" stroke="${C.machine}" stroke-width="5"/>
     <line x1="10" y1="175" x2="310" y2="175" stroke="${C.floor}" stroke-width="4"/>`,
 
-  hipThrustBench: () => `<rect x="42" y="106" width="92" height="11" rx="5" fill="${C.pad}" stroke="${C.machine}" stroke-width="1.5"/>
-    <line x1="56" y1="117" x2="56" y2="175" stroke="${C.machine}" stroke-width="5"/>
-    <line x1="120" y1="117" x2="120" y2="175" stroke="${C.machine}" stroke-width="5"/>
+  hipThrustBench: () => `<rect x="42" y="138" width="92" height="11" rx="5" fill="${C.pad}" stroke="${C.machine}" stroke-width="1.5"/>
+    <line x1="56" y1="149" x2="56" y2="175" stroke="${C.machine}" stroke-width="5"/>
+    <line x1="120" y1="149" x2="120" y2="175" stroke="${C.machine}" stroke-width="5"/>
     <line x1="10" y1="175" x2="310" y2="175" stroke="${C.floor}" stroke-width="4"/>`,
 
   treadmill: () => `<rect x="60" y="156" width="190" height="14" rx="4" fill="${C.pad}" stroke="${C.machine}" stroke-width="1.5" transform="rotate(-6 155 163)"/>
@@ -264,6 +336,13 @@ function dumbbell(p, r = 6) {
   return `<g><circle cx="${p.x.toFixed(1)}" cy="${(p.y - r - 2).toFixed(1)}" r="${r}" fill="${C.machineLight}"/>
     <circle cx="${p.x.toFixed(1)}" cy="${(p.y + r + 2).toFixed(1)}" r="${r}" fill="${C.machineLight}"/>
     <rect x="${(p.x - 2).toFixed(1)}" y="${(p.y - 4).toFixed(1)}" width="4" height="8" fill="${C.machine}"/></g>`;
+}
+function sledPlate(j, push) {
+  const c = px(j.ankle, push, 8);
+  const e1 = px(c, push + 90, 30), e2 = px(c, push - 90, 30), w = px(c, push, 22);
+  return `<line x1="${e1.x.toFixed(1)}" y1="${e1.y.toFixed(1)}" x2="${e2.x.toFixed(1)}" y2="${e2.y.toFixed(1)}"
+      stroke="${C.machineLight}" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="${w.x.toFixed(1)}" cy="${w.y.toFixed(1)}" r="15" fill="${C.machineDark}" stroke="${C.machineLight}" stroke-width="2"/>`;
 }
 function barTo(a, b) {
   return `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="${C.machineLight}" stroke-width="5" stroke-linecap="round"/>`;
@@ -349,6 +428,8 @@ const ANIM = {
     parts: [{ x: 60, y: 14, t: "parallel bars" }]
   },
   pushupDog: {
+    faultAt: "a",
+    prone: true,
     machine: "mat", caption: "Push-up → hips up and back into downward dog",
     a: { x: 150, y: 130, tilt: 0, torso: 172, head: 182, arm: 136, farm: 32, armB: 140, farmB: 36, thigh: 21, shin: 19, foot: 60 },
     b: { x: 178, y: 96, tilt: 0, torso: 146, head: 156, arm: 139, farm: 124, armB: 143, farmB: 128, thigh: 66, shin: 64, foot: 40 },
@@ -374,9 +455,12 @@ const ANIM = {
     parts: [{ x: 262, y: 100, t: "footplates" }]
   },
   dumbbellRow: {
-    machine: "benchFlat", caption: "Elbow drives up to the ribs • 3s lower to full stretch",
-    a: { x: 182, y: 104, tilt: 0, torso: 168, head: 160, arm: 88, farm: 88, armB: 150, farmB: 120, thigh: 86, shin: 88, foot: 0, thighB: 110, shinB: 70 },
-    b: { x: 182, y: 104, tilt: 0, torso: 168, head: 160, arm: 150, farm: 60, armB: 150, farmB: 120, thigh: 86, shin: 88, foot: 0, thighB: 110, shinB: 70 },
+    machine: "benchLow",
+    prone: true,
+    caption: "Elbow drives up to the ribs \u2022 3s lower to full stretch",
+    a: { x: 160, y: 102, tilt: 0, torso: 192, head: 202, arm: 101, farm: 78, armB: 63, farmB: 125.1, thigh: 80, shin: 4, foot: 0, thighB: 76.5, shinB: 65.3, footB: 0 },
+    b: { x: 160, y: 102, tilt: 0, torso: 192, head: 202, arm: -39.8, farm: 109.4, armB: 63, farmB: 125.1, thigh: 80, shin: 4, foot: 0, thighB: 76.5, shinB: 65.3, footB: 0 },
+    wrong: { x: 160, y: 102, tilt: 28, torso: 186, head: 196, arm: -39.8, farm: 109.4, armB: 63, farmB: 125.1, thigh: 80, shin: 4, foot: 0, thighB: 76.5, shinB: 65.3, footB: 0 },
     wrongNote: "Lower back sagging and hips rotating to steal extra range",
     kit: j => dumbbell(j.wrist)
   },
@@ -435,13 +519,15 @@ const ANIM = {
 
   /* ---------------- legs ---------------- */
   legPress: {
+    machine: "legPressSeat",
     faultAt: "a",
-    wrong: { x: 110, y: 122, tilt: -30, torso: -118, head: -104, arm: -40, farm: -20, armB: -36, farmB: -16, thigh: -54, shin: 22, foot: -58, thighB: -48, shinB: 28 },
-    machine: "legPress", caption: "Feet high on the platform • drive through the heels",
-    a: { x: 110, y: 120, tilt: 0, torso: -108, head: -100, arm: -40, farm: -20, armB: -36, farmB: -16, thigh: -44, shin: 28, foot: -58, thighB: -38, shinB: 34 },
-    b: { x: 110, y: 120, tilt: 0, torso: -108, head: -100, arm: -40, farm: -20, armB: -36, farmB: -16, thigh: -26, shin: -20, foot: -58, thighB: -22, shinB: -16 },
-    wrongNote: "Lowered so deep the tailbone curls off the seat — load moves to the lumbar discs",
-    parts: [{ x: 244, y: 56, t: "feet on UPPER half" }, { x: 44, y: 150, t: "sacrum glued down" }]
+    caption: "Feet high on the platform \u2022 drive through the heels",
+    a: { x: 100, y: 132, tilt: 0, torso: -128, head: -114, arm: 41.9, farm: 46, armB: 41.9, farmB: 46, thigh: -75.6, shin: 36.6, foot: -110, thighB: -78.6, shinB: 33.6, footB: -110 },
+    b: { x: 100, y: 132, tilt: 0, torso: -128, head: -114, arm: 41.9, farm: 46, armB: 41.9, farmB: 46, thigh: -41.2, shin: -1.6, foot: -110, thighB: -44.2, shinB: -4.6, footB: -110 },
+    wrong: { x: 104, y: 128, tilt: -30, torso: -116, head: -102, arm: 51.6, farm: 55.8, armB: 51.6, farmB: 55.8, thigh: -82.4, shin: 45.3, foot: -110, thighB: -85.4, shinB: 42.3, footB: -110 },
+    wrongNote: "Lowered so deep the tailbone curls off the seat \u2014 load moves to the lumbar discs",
+    kit: j => sledPlate(j, -22),
+    parts: [{ x: 62, y: 102, t: "back flat on the pad" }]
   },
   legExtension: {
     machine: "legExt", caption: "Extend fully • 1s quad squeeze • 3s down",
@@ -451,9 +537,11 @@ const ANIM = {
     parts: [{ x: 206, y: 170, t: "ankle pad" }]
   },
   legCurl: {
+    prone: true,
     machine: "legCurl", caption: "Curl to the glutes • 1s peak • 3s lower",
     a: { x: 130, y: 110, tilt: 0, torso: 176, head: 172, arm: 170, farm: 166, armB: 174, farmB: 170, thigh: 2, shin: 2, foot: 60 },
     b: { x: 130, y: 110, tilt: 0, torso: 176, head: 172, arm: 170, farm: 166, armB: 174, farmB: 170, thigh: 2, shin: -92, foot: -40 },
+    wrong: { x: 130, y: 101, tilt: 28, torso: 176, head: 172, arm: 170, farm: 166, armB: 174, farmB: 170, thigh: 16, shin: -92, foot: -40 },
     wrongNote: "Hips popping up off the pad as you curl — the most common error on this machine",
     parts: [{ x: 96, y: 100, t: "pubic bone pressed down" }, { x: 240, y: 112, t: "roller on calves" }]
   },
@@ -494,11 +582,12 @@ const ANIM = {
   },
   hipThrust: {
     machine: "hipThrustBench", caption: "Chin tucked • drive to a straight knee-to-shoulder line • 2s hold",
-    a: { x: 164, y: 148, tilt: 0, torso: 196, head: 192, arm: 196, farm: 190, armB: 200, farmB: 194, thigh: -56, shin: 76, foot: 0, thighB: -52, shinB: 80 },
-    b: { x: 164, y: 118, tilt: 0, torso: 180, head: 178, arm: 184, farm: 178, armB: 188, farmB: 182, thigh: -32, shin: 90, foot: 0, thighB: -28, shinB: 92 },
+    a: { x: 160, y: 162, tilt: 0, torso: -142.7, head: -138.7, arm: 186, farm: 182, armB: 190, farmB: 186, thigh: -42.8, shin: 54.2, foot: 0, thighB: -38.5, shinB: 51.4 },
+    b: { x: 172, y: 137, tilt: -4, torso: -175.4, head: -171.4, arm: 186, farm: 182, armB: 190, farmB: 186, thigh: -8.1, shin: 92.9, foot: 0, thighB: -6.5, shinB: 87.9 },
+    wrong: { x: 172, y: 130, tilt: 30, torso: -183.4, head: -160, arm: 186, farm: 182, armB: 190, farmB: 186, thigh: 3.4, shin: 93.4, foot: 0, thighB: 4.9, shinB: 88 },
     wrongNote: "Looking at the ceiling and finishing with a lumbar arch instead of a glute squeeze",
     kit: j => barTo({ x: j.pelvis.x - 14, y: j.pelvis.y - 10 }, { x: j.pelvis.x + 14, y: j.pelvis.y - 10 }),
-    parts: [{ x: 60, y: 96, t: "upper back on bench" }]
+    parts: [{ x: 62, y: 128, t: "upper back on bench" }]
   },
   hipAbduction: {
     faultPic: false,
@@ -523,11 +612,12 @@ const ANIM = {
     hold: false
   },
   kneeHug: {
-    machine: "floor", caption: "Hug the knee to the chest • standing pelvis stays level",
-    a: { x: 150, y: 104, tilt: 0, torso: -88, head: -86, arm: 60, farm: 20, armB: 64, farmB: 24, thigh: 88, shin: 90, foot: 0, thighB: 92, shinB: 90 },
-    b: { x: 150, y: 104, tilt: 0, torso: -84, head: -84, arm: 46, farm: 10, armB: 50, farmB: 14, thigh: 88, shin: 90, foot: 0, thighB: 32, shinB: 104 },
-    wrongNote: "Lower back arching on the standing side as the knee comes up",
-    hold: false
+    machine: "floor",
+    caption: "Hug the knee to the chest \u2022 standing hip stays level",
+    a: { x: 150, y: 104, tilt: 0, torso: -88, head: -86, arm: 81.1, farm: 77.7, armB: 84.1, farmB: 80.7, thigh: 90, shin: 90, foot: 0, thighB: 60, shinB: 96, footB: 10 },
+    b: { x: 150, y: 104, tilt: -4, torso: -86, head: -84, arm: 73.3, farm: 33.9, armB: 76.3, farmB: 36.9, thigh: 90, shin: 90, foot: 0, thighB: -34, shinB: 96, footB: 10 },
+    wrong: { x: 150, y: 104, tilt: 28, torso: -96, head: -94, arm: 48.8, farm: 43.9, armB: 51.8, farmB: 46.9, thigh: 90, shin: 90, foot: 0, thighB: -34, shinB: 96, footB: 10 },
+    wrongNote: "Lower back arching on the standing side as the knee comes up"
   },
 
   /* ---------------- APT core work ---------------- */
@@ -548,23 +638,26 @@ const ANIM = {
     parts: [{ x: 92, y: 134, t: "back stays flat" }]
   },
   gluteBridge: {
-    machine: "mat", caption: "Flatten the back first • lift from the glutes • 2s hold",
-    a: { x: 150, y: 152, tilt: 0, torso: 184, head: 180, arm: 176, farm: 174, armB: 180, farmB: 178, thigh: -47, shin: 81, foot: 0, thighB: -44, shinB: 78 },
-    b: { x: 150, y: 124, tilt: -4, torso: 178, head: 176, arm: 172, farm: 170, armB: 176, farmB: 174, thigh: 4, shin: 100, foot: 0, thighB: 5, shinB: 95 },
-    wrong: { x: 150, y: 118, tilt: 28, torso: 186, head: 182, arm: 172, farm: 170, armB: 176, farmB: 174, thigh: 8, shin: 104, foot: 0, thighB: 9, shinB: 99 },
-    wrongNote: "Over-bridging into a lumbar arch to get higher — stop at the straight line",
+    machine: "mat",
+    caption: "Flatten the back first \u2022 lift from the glutes \u2022 2s hold",
+    a: { x: 150, y: 154, tilt: 0, torso: 180, head: 180, arm: 6, farm: 2, armB: 8, farmB: 4, thigh: -45.5, shin: 69.7, foot: 0, thighB: -41.9, shinB: 66.9 },
+    b: { x: 146, y: 130, tilt: -4, torso: 153.4, head: 180, arm: 6, farm: 2, armB: 8, farmB: 4, thigh: -4.3, shin: 81.1, foot: 0, thighB: -1.7, shinB: 75.9 },
+    wrong: { x: 146, y: 121, tilt: 30, torso: 145.5, head: 180, arm: 6, farm: 2, armB: 8, farmB: 4, thigh: 10.7, shin: 80.2, foot: 0, thighB: 13.6, shinB: 74.2 },
+    wrongNote: "Over-bridging into a lumbar arch to get higher \u2014 stop at the straight line",
     parts: [{ x: 214, y: 162, t: "drive through heels" }]
   },
   rkcPlank: {
+    prone: true,
     machine: "mat", caption: "Tailbone tucked • glutes and quads at 100% • elbows pull to toes",
     hold: true,
-    a: { x: 150, y: 132, tilt: -8, torso: 169, head: 185, arm: 86, farm: 180, armB: 88, farmB: 178, thigh: 23, shin: 14, foot: 70, thighB: 25, shinB: 16 },
-    b: { x: 150, y: 129, tilt: -11, torso: 170, head: 186, arm: 86, farm: 180, armB: 88, farmB: 178, thigh: 26, shin: 16, foot: 70, thighB: 28, shinB: 18 },
+    a: { x: 150, y: 132, tilt: -4, torso: 169, head: 185, arm: 86, farm: 180, armB: 88, farmB: 178, thigh: 23, shin: 14, foot: 70, thighB: 25, shinB: 16 },
+    b: { x: 150, y: 129, tilt: -6, torso: 170, head: 186, arm: 86, farm: 180, armB: 88, farmB: 178, thigh: 26, shin: 16, foot: 70, thighB: 28, shinB: 18 },
     wrong: { x: 150, y: 142, tilt: 27, torso: 175, head: 192, arm: 86, farm: 180, armB: 88, farmB: 178, thigh: 14, shin: 10, foot: 74, thighB: 16, shinB: 12 },
     wrongNote: "Belly and hips sagging toward the mat — that is literally practising APT",
     parts: [{ x: 100, y: 108, t: "elbows under shoulders" }]
   },
   sidePlank: {
+    prone: true,
     machine: "mat", caption: "One straight line • squeeze the bottom glute • 40s",
     hold: true,
     a: { x: 150, y: 138, tilt: 0, torso: 174, head: 178, arm: 86, farm: 180, armB: -90, farmB: -90, thigh: 23, shin: 8, foot: 60, thighB: 23, shinB: 8 },
@@ -574,6 +667,7 @@ const ANIM = {
     parts: [{ x: 98, y: 110, t: "elbow under shoulder" }]
   },
   birdDog: {
+    prone: true,
     machine: "mat", caption: "Arm and opposite leg to parallel • leg never above hip height",
     a: { x: 160, y: 131, tilt: 0, torso: 192, head: 206, arm: 68, farm: 92, armB: 81, farmB: 112, thigh: 90, shin: 8, foot: 0, thighB: 90, shinB: 8 },
     b: { x: 160, y: 131, tilt: 0, torso: 192, head: 200, arm: 162, farm: 202, armB: 81, farmB: 112, thigh: 90, shin: 8, foot: 0, thighB: 14, shinB: -14, footB: -14 },
@@ -597,6 +691,7 @@ const ANIM = {
     kit: j => cableTo({ x: 253, y: 96 }, j.wrist)
   },
   catCamel: {
+    prone: true,
     faultPic: false,
     machine: "mat", caption: "Round up, tailbone tucked • then slowly reverse • 3s each way",
     a: { x: 160, y: 131, tilt: -18, torso: 192, head: 232, arm: 81, farm: 112, armB: 83, farmB: 114, thigh: 90, shin: 8, foot: 0, thighB: 90, shinB: 8 },
@@ -605,50 +700,55 @@ const ANIM = {
     hold: false
   },
   breathing90: {
-    machine: "wall", caption: "4s in through the nose • 8s out • ribs drop, tailbone tucked",
+    machine: "wall",
     hold: true,
-    a: { x: 142, y: 150, tilt: -8, torso: 180, head: 176, arm: -88, farm: -86, armB: -84, farmB: -82, thigh: -58, shin: 2, foot: 64, thighB: -54, shinB: 6 },
-    b: { x: 142, y: 151, tilt: -12, torso: 179, head: 175, arm: -88, farm: -86, armB: -84, farmB: -82, thigh: -58, shin: 2, foot: 64, thighB: -54, shinB: 6 },
-    wrong: { x: 142, y: 147, tilt: 22, torso: 184, head: 180, arm: -88, farm: -86, armB: -84, farmB: -82, thigh: -58, shin: 2, foot: 64, thighB: -54, shinB: 6 },
-    wrongNote: "Chest breathing with the ribs flared — a neutral pelvis is almost impossible from here",
-    parts: [{ x: 230, y: 136, t: "feet flat on wall, 90/90" }]
+    caption: "4s in through the nose \u2022 8s out \u2022 ribs drop, tailbone tucked",
+    a: { x: 201, y: 155, tilt: -6, torso: 180, head: 180, arm: -90, farm: -90, armB: -86, farmB: -86, thigh: -90, shin: 0, foot: -90, thighB: -86, shinB: 2, footB: -88 },
+    b: { x: 201, y: 156, tilt: -12, torso: 179, head: 179, arm: -90, farm: -90, armB: -86, farmB: -86, thigh: -90, shin: 0, foot: -90, thighB: -86, shinB: 2, footB: -88 },
+    wrong: { x: 201, y: 151, tilt: 24, torso: 184, head: 184, arm: -90, farm: -90, armB: -86, farmB: -86, thigh: -90, shin: 0, foot: -90, thighB: -86, shinB: 2, footB: -88 },
+    wrongNote: "Chest breathing with the ribs flared \u2014 a neutral pelvis is almost impossible from here",
+    parts: [{ x: 230, y: 92, t: "feet flat on wall, 90/90" }]
   },
   wallPostureReset: {
-    machine: "wall", caption: "Tuck until the hand behind your back is pinned • then walk 10 steps",
+    machine: "wallLeft",
     hold: true,
-    a: { x: 206, y: 104, tilt: 12, torso: -90, head: -88, arm: 92, farm: 96, armB: 88, farmB: 92, thigh: 90, shin: 90, foot: 0, thighB: 92, shinB: 90 },
-    b: { x: 206, y: 104, tilt: -6, torso: -90, head: -88, arm: 92, farm: 96, armB: 88, farmB: 92, thigh: 90, shin: 90, foot: 0, thighB: 92, shinB: 90 },
-    wrong: { x: 206, y: 104, tilt: 26, torso: -92, head: -88, arm: 92, farm: 96, armB: 88, farmB: 92, thigh: 90, shin: 90, foot: 0, thighB: 92, shinB: 90 },
-    wrongNote: "A whole fist fits behind the lower back — significant APT, the usual week-1 result",
-    parts: [{ x: 238, y: 110, t: "gap to close" }]
+    caption: "Tuck until the hand behind your back is pinned \u2022 then walk 10 steps",
+    a: { x: 88, y: 104, torso: -90, head: -90, thigh: 93, shin: 90, foot: 0, thighB: 95, shinB: 90, tilt: 10, arm: 92, farm: 96, armB: 120, farmB: 30 },
+    b: { x: 88, y: 104, torso: -90, head: -90, thigh: 93, shin: 90, foot: 0, thighB: 95, shinB: 90, tilt: -8, arm: 92, farm: 96, armB: 120, farmB: 30 },
+    wrong: { x: 92, y: 104, torso: -94, head: -90, thigh: 93, shin: 90, foot: 0, thighB: 95, shinB: 90, tilt: 28, arm: 92, farm: 96, armB: 120, farmB: 30 },
+    wrongNote: "A whole fist fits behind the lower back \u2014 significant APT, the usual week-1 result",
+    parts: [{ x: 80, y: 120, t: "close this gap" }]
   },
   wallSlide: {
-    machine: "wall", caption: "Forearms slide overhead • lower back stays flat on the wall",
-    a: { x: 204, y: 106, tilt: -2, torso: -90, head: -88, arm: 118, farm: -66, armB: 114, farmB: -62, thigh: 90, shin: 90, foot: 0, thighB: 92, shinB: 90 },
-    b: { x: 204, y: 106, tilt: -2, torso: -90, head: -88, arm: -70, farm: -82, armB: -66, farmB: -78, thigh: 90, shin: 90, foot: 0, thighB: 92, shinB: 90 },
-    wrong: { x: 204, y: 106, tilt: 24, torso: -92, head: -88, arm: -70, farm: -82, armB: -66, farmB: -78, thigh: 90, shin: 90, foot: 0, thighB: 92, shinB: 90 },
-    wrongNote: "Lower back peeling off the wall so the arms can reach higher — a live APT test you just failed",
-    parts: [{ x: 236, y: 122, t: "lumbar flat on wall" }]
+    machine: "wallLeft",
+    caption: "Forearms slide overhead \u2022 lower back stays flat on the wall",
+    a: { x: 88, y: 104, torso: -90, head: -90, thigh: 93, shin: 90, foot: 0, thighB: 95, shinB: 90, tilt: -2, arm: 100, farm: -96, armB: 104, farmB: -92 },
+    b: { x: 88, y: 104, torso: -90, head: -90, thigh: 93, shin: 90, foot: 0, thighB: 95, shinB: 90, tilt: -2, arm: -96, farm: -94, armB: -92, farmB: -90 },
+    wrong: { x: 92, y: 104, torso: -94, head: -90, thigh: 93, shin: 90, foot: 0, thighB: 95, shinB: 90, tilt: 28, arm: -96, farm: -94, armB: -92, farmB: -90 },
+    wrongNote: "Lower back peeling off the wall so the arms can reach higher \u2014 a live APT test you just failed",
+    parts: [{ x: 80, y: 122, t: "lumbar flat on wall" }]
   },
 
   /* ---------------- stretches & release ---------------- */
   hipFlexorStretch: {
-    machine: "mat", caption: "1 tuck tailbone • 2 squeeze glute • 3 shift forward just 2 inches",
+    machine: "mat",
     hold: true,
-    a: { x: 142, y: 120, tilt: -2, torso: -90, head: -88, arm: 66, farm: 56, armB: 70, farmB: 60, thigh: 56, shin: 118, foot: 10, thighB: 128, shinB: 8, footB: 70 },
-    b: { x: 148, y: 120, tilt: -10, torso: -90, head: -88, arm: 66, farm: 56, armB: 70, farmB: 60, thigh: 52, shin: 122, foot: 10, thighB: 132, shinB: 4, footB: 70 },
-    wrong: { x: 158, y: 124, tilt: 28, torso: -74, head: -72, arm: 66, farm: 56, armB: 70, farmB: 60, thigh: 46, shin: 128, foot: 10, thighB: 138, shinB: 0, footB: 70 },
-    wrongNote: "Deep lunge with an arched back — that compresses the lumbar spine and does nothing for the psoas",
-    parts: [{ x: 96, y: 150, t: "kneeling knee" }, { x: 206, y: 150, t: "front foot at 90°" }]
+    caption: "1 tuck tailbone \u2022 2 squeeze glute \u2022 3 shift forward just 2 inches",
+    a: { x: 128, y: 130, tilt: -2, torso: -90, head: -88, arm: 91.3, farm: 66.5, armB: 95.3, farmB: 70.5, thigh: -4.7, shin: 84.6, foot: 0, thighB: 113.6, shinB: 180, footB: 180 },
+    b: { x: 132, y: 130, tilt: -12, torso: -90, head: -88, arm: 91.3, farm: 66.5, armB: 95.3, farmB: 70.5, thigh: -4.9, shin: 91.5, foot: 0, thighB: 119.4, shinB: 180, footB: 180 },
+    wrong: { x: 140, y: 136, tilt: 30, torso: -76, head: -74, arm: 114.8, farm: 72.2, armB: 118.8, farmB: 76.2, thigh: -14.8, shin: 93.2, foot: 0, thighB: 135, shinB: 180, footB: 180 },
+    wrongNote: "Deep lunge with an arched back \u2014 that compresses the lumbar spine and does nothing for the psoas",
+    parts: [{ x: 96, y: 150, t: "rear knee on the mat" }, { x: 206, y: 150, t: "front foot at 90\u00b0" }]
   },
   couchStretch: {
-    machine: "benchFlat", caption: "Rear knee fully bent • tuck and squeeze • torso toward vertical",
+    machine: "wallLeft",
     hold: true,
-    a: { x: 130, y: 122, tilt: -4, torso: -78, head: -76, arm: 70, farm: 60, armB: 74, farmB: 64, thigh: 54, shin: 120, foot: 10, thighB: 140, shinB: -52, footB: 20 },
-    b: { x: 130, y: 122, tilt: -12, torso: -88, head: -86, arm: 70, farm: 60, armB: 74, farmB: 64, thigh: 52, shin: 122, foot: 10, thighB: 144, shinB: -58, footB: 14 },
-    wrong: { x: 142, y: 126, tilt: 28, torso: -66, head: -64, arm: 70, farm: 60, armB: 74, farmB: 64, thigh: 48, shin: 126, foot: 10, thighB: 136, shinB: -46, footB: 24 },
+    caption: "Rear shin up the wall \u2022 tuck and squeeze \u2022 torso toward vertical",
+    a: { x: 102, y: 133, tilt: -4, torso: -66, head: -62, arm: 77.9, farm: 72.9, armB: 81.9, farmB: 76.9, thigh: -6.5, shin: 87.9, foot: 0, thighB: 121, shinB: -90, footB: -90 },
+    b: { x: 102, y: 133, tilt: -12, torso: -88, head: -84, arm: 61.7, farm: 57.5, armB: 65.7, farmB: 61.5, thigh: -6.5, shin: 87.9, foot: 0, thighB: 121, shinB: -90, footB: -90 },
+    wrong: { x: 104, y: 135, tilt: 30, torso: -98, head: -94, arm: 54.8, farm: 50.8, armB: 58.8, farmB: 54.8, thigh: -9.8, shin: 87.4, foot: 0, thighB: 125.5, shinB: -90, footB: -90 },
     wrongNote: "Going fully upright before the hips allow it, so the lower back arches to compensate",
-    parts: [{ x: 60, y: 108, t: "rear shin on bench" }]
+    parts: [{ x: 80, y: 124, t: "rear shin up the wall" }]
   },
   quadStretch: {
     machine: "rackUpright", caption: "Tuck the tailbone FIRST, then pull the heel in",
@@ -660,27 +760,27 @@ const ANIM = {
     parts: [{ x: 196, y: 140, t: "knee stays under the hip" }]
   },
   hamstringStretch: {
-    machine: "mat", caption: "Hinge from the hip with a FLAT back • 45s",
+    machine: "mat",
     hold: true,
-    a: { x: 130, y: 142, tilt: 0, torso: -84, head: -80, arm: 10, farm: 8, armB: 14, farmB: 12, thigh: 2, shin: 4, foot: -40, thighB: 34, shinB: 132 },
-    b: { x: 130, y: 142, tilt: -4, torso: -56, head: -52, arm: 12, farm: 10, armB: 16, farmB: 14, thigh: 2, shin: 4, foot: -40, thighB: 34, shinB: 132 },
-    // The fault here is spinal rounding rather than an anterior tilt, so the
-    // wrong pose uses a negative tilt: the spine curve bends the other way
-    // and visibly reads as a rounded back.
-    wrong: { x: 130, y: 142, tilt: -28, torso: -40, head: -6, arm: 16, farm: 14, armB: 20, farmB: 18, thigh: 2, shin: 4, foot: -40, thighB: 34, shinB: 132 },
-    wrongNote: "Rounding the spine to touch the toes — less range with a flat back is the better stretch",
-    parts: [{ x: 226, y: 158, t: "straight leg" }]
+    caption: "Hinge from the hip with a FLAT back \u2022 45s",
+    a: { x: 116, y: 152, tilt: 0, torso: -84, head: -80, arm: 13.1, farm: -43.6, armB: 16.1, farmB: -40.6, thigh: 2, shin: 0, foot: -78, thighB: -18, shinB: 166, footB: 150 },
+    b: { x: 116, y: 152, tilt: -4, torso: -50, head: -46, arm: 47.1, farm: -9.6, armB: 50.1, farmB: -6.6, thigh: 2, shin: 0, foot: -78, thighB: -18, shinB: 166, footB: 150 },
+    wrong: { x: 116, y: 152, tilt: -30, torso: -30, head: 40, arm: 67.1, farm: 10.4, armB: 70.1, farmB: 13.4, thigh: 2, shin: 0, foot: -78, thighB: -18, shinB: 166, footB: 150 },
+    wrongNote: "Rounding the spine to touch the toes \u2014 less range with a flat back is the better stretch",
+    parts: [{ x: 226, y: 160, t: "straight leg" }]
   },
   figure4: {
-    machine: "mat", caption: "Pull the knee in • lower back stays flat • 45s",
+    machine: "mat",
     hold: true,
-    a: { x: 150, y: 150, tilt: -2, torso: 180, head: 176, arm: 146, farm: 110, armB: 150, farmB: 114, thigh: -70, shin: 30, foot: 80, thighB: -40, shinB: 20 },
-    b: { x: 150, y: 150, tilt: -8, torso: 178, head: 175, arm: 150, farm: 116, armB: 154, farmB: 120, thigh: -84, shin: 16, foot: 70, thighB: -44, shinB: 10 },
-    wrong: { x: 150, y: 146, tilt: 22, torso: 184, head: 180, arm: 150, farm: 116, armB: 154, farmB: 120, thigh: -84, shin: 16, foot: 70, thighB: -44, shinB: 10 },
+    caption: "Pull the knee in \u2022 lower back stays flat \u2022 45s",
+    a: { x: 150, y: 154, tilt: -2, torso: 180, head: 178, arm: -28.2, farm: -24.2, armB: -25.2, farmB: -21.2, thigh: -66, shin: 28, foot: 70, thighB: -36, shinB: 16, footB: 10 },
+    b: { x: 150, y: 154, tilt: -8, torso: 179, head: 177, arm: -34.1, farm: -30, armB: -31.1, farmB: -27, thigh: -80, shin: 18, foot: 70, thighB: -44, shinB: 8, footB: 10 },
+    wrong: { x: 150, y: 150, tilt: 24, torso: 184, head: 182, arm: -30.6, farm: -26.3, armB: -27.6, farmB: -23.3, thigh: -80, shin: 18, foot: 70, thighB: -44, shinB: 8, footB: 10 },
     wrongNote: "Hips rolling and the back lifting off the mat as you pull the knee in",
-    parts: [{ x: 94, y: 136, t: "back flat on mat" }]
+    parts: [{ x: 94, y: 140, t: "back flat on mat" }]
   },
   childPose: {
+    prone: true,
     faultPic: false,
     machine: "mat", caption: "Sink the hips back • breathe into the lower back • 60s",
     hold: true,
@@ -690,31 +790,36 @@ const ANIM = {
     parts: [{ x: 70, y: 132, t: "arms reach long" }]
   },
   pecStretch: {
-    machine: "doorway", caption: "Step through gently • ribs down, pelvis neutral • 30s",
+    machine: "doorway",
     hold: true,
-    a: { x: 150, y: 104, tilt: 0, torso: -90, head: -86, arm: -20, farm: -64, armB: 94, farmB: 92, thigh: 90, shin: 90, foot: 0, thighB: 70, shinB: 100 },
-    b: { x: 156, y: 104, tilt: -4, torso: -90, head: -84, arm: -16, farm: -58, armB: 94, farmB: 92, thigh: 92, shin: 88, foot: 0, thighB: 66, shinB: 104 },
-    wrong: { x: 158, y: 104, tilt: 26, torso: -96, head: -88, arm: -14, farm: -56, armB: 94, farmB: 92, thigh: 92, shin: 88, foot: 0, thighB: 66, shinB: 104 },
-    wrongNote: "Arching the back to feel a bigger stretch — that stretches your spine, not your chest",
-    parts: [{ x: 234, y: 68, t: "forearm on the frame" }]
+    caption: "Forearm on the frame \u2022 step through gently \u2022 ribs down \u2022 30s",
+    a: { x: 88, y: 106, tilt: 0, torso: -90, head: -88, arm: -85.8, farm: 175.4, armB: 94, farmB: 92, thigh: 82, shin: 96, foot: 0, thighB: 100, shinB: 86 },
+    b: { x: 92, y: 106, tilt: -4, torso: -88, head: -86, arm: -98.6, farm: 175.9, armB: 94, farmB: 92, thigh: 82, shin: 96, foot: 0, thighB: 100, shinB: 86 },
+    wrong: { x: 94, y: 106, tilt: 28, torso: -96, head: -94, arm: -87, farm: 175.3, armB: 94, farmB: 92, thigh: 82, shin: 96, foot: 0, thighB: 100, shinB: 86 },
+    wrongNote: "Arching the back to feel a bigger stretch \u2014 that stretches your spine, not your chest",
+    parts: [{ x: 66, y: 20, t: "forearm on the frame" }]
   },
   latStretch: {
-    machine: "rackUpright", caption: "Sit the hips back and away • long stretch down the side • 30s",
+    machine: "rackUpright",
     hold: true,
-    a: { x: 150, y: 110, tilt: 0, torso: -74, head: -70, arm: -30, farm: -26, armB: 94, farmB: 92, thigh: 88, shin: 90, foot: 0, thighB: 92, shinB: 90 },
-    b: { x: 140, y: 118, tilt: -4, torso: -58, head: -54, arm: -34, farm: -30, armB: 94, farmB: 92, thigh: 37, shin: 119, foot: 0, thighB: 36, shinB: 116 },
+    caption: "Hold at waist height \u2022 sit the hips back and away \u2022 30s",
+    a: { x: 170, y: 106, tilt: 0, torso: -62, head: -56, arm: 48.2, farm: 69.9, armB: 51.2, farmB: 72.9, thigh: 52.6, shin: 102.7, foot: 0, thighB: 51.4, shinB: 98.4 },
+    b: { x: 158, y: 116, tilt: -6, torso: -34, head: -28, arm: -18.4, farm: 103.9, armB: -15.4, farmB: 106.9, thigh: 29.6, shin: 97.7, foot: 0, thighB: 29.1, shinB: 92.7 },
+    wrong: { x: 160, y: 114, tilt: 28, torso: -40, head: -34, arm: -4.1, farm: 103.9, armB: -1.1, farmB: 106.9, thigh: 33.7, shin: 98.9, foot: 0, thighB: 33, shinB: 94.1 },
     wrongNote: "Hollowing the lower back to deepen it instead of sitting the hips back",
     parts: [{ x: 226, y: 92, t: "hold at waist height" }]
   },
   thoracicOpener: {
+    machine: "rollerBack",
     faultPic: false,
-    machine: "roller", caption: "Extend over the roller • MID-back only • 10 reps + 30s hold",
-    a: { x: 150, y: 142, tilt: 0, torso: 186, head: 182, arm: 150, farm: 196, armB: 154, farmB: 200, thigh: -40, shin: 84, foot: 0, thighB: -36, shinB: 88 },
-    b: { x: 150, y: 144, tilt: -4, torso: 196, head: 206, arm: 150, farm: 200, armB: 154, farmB: 204, thigh: -40, shin: 84, foot: 0, thighB: -36, shinB: 88 },
+    caption: "Extend over the roller \u2022 MID-back only \u2022 10 reps + 30s hold",
+    a: { x: 210, y: 156, tilt: 0, torso: 190, head: 192, arm: 204, farm: -24, armB: 208, farmB: -20, thigh: -52, shin: 72, foot: 0, thighB: -48, shinB: 76 },
+    b: { x: 210, y: 156, tilt: -4, torso: 198, head: 214, arm: 204, farm: -24, armB: 208, farmB: -20, thigh: -52, shin: 72, foot: 0, thighB: -48, shinB: 76 },
     wrongNote: "Letting the roller slide down to the lower back and cranking there",
-    parts: [{ x: 214, y: 174, t: "roller across mid-back" }]
+    parts: [{ x: 180, y: 186, t: "roller under mid-back" }]
   },
   foamRollQuad: {
+    prone: true,
     faultPic: false,
     machine: "roller", caption: "Slow • pause and breathe out on the tender spots",
     a: { x: 118, y: 130, tilt: 0, torso: 158, head: 150, arm: 70, farm: 88, armB: 74, farmB: 90, thigh: 12, shin: 6, foot: 60, thighB: 16, shinB: 10 },
@@ -858,6 +963,11 @@ function frameFor(poses) {
   return `${x.toFixed(1)} ${y.toFixed(1)} ${Math.min(320, w).toFixed(1)} ${Math.min(200, h).toFixed(1)}`;
 }
 
+/* Dumbbells, cables, bars and the sled plate attached to the figure's hands/feet. */
+function kitFor(tpl, pose) {
+  return tpl.kit ? tpl.kit(joints(pose)) : "";
+}
+
 /* Dashed ring around the lumbar spine — where to look. */
 function lumbarRing(p, color) {
   const j = joints(p);
@@ -885,7 +995,8 @@ function drawFormCheck(ex, host) {
       aria-label="${isBad ? "Wrong" : "Correct"} form: lower back ${isBad ? kind : "neutral"}">
       <rect x="-10" y="-10" width="340" height="220" fill="${isBad ? "#1c0b0b" : "#071a12"}"/>
       ${machine}
-      ${figure(pose, { bad: isBad })}
+      ${figure(pose, { bad: isBad, prone: tpl.prone })}
+      ${kitFor(tpl, pose)}
       ${lumbarRing(pose, isBad ? "#fca5a5" : "#6ee7b7")}
     </svg>`;
   host.innerHTML = `
@@ -938,7 +1049,8 @@ function drawExercise(ex, host) {
     const ph = phases[pi];
     const k = Math.min(1, (now - t0) / ph.ms);
     const t = from + (ph.to - from) * easeInOut(k);
-    bodyG.innerHTML = figure(lerpPose(tpl.a, tpl.b, t), { showHands: true });
+    const pose = lerpPose(tpl.a, tpl.b, t);
+    bodyG.innerHTML = figure(pose, { showHands: true, prone: tpl.prone }) + kitFor(tpl, pose);
     if (k >= 1) { from = ph.to; pi = (pi + 1) % phases.length; t0 = now; }
     host._fxHandle = requestAnimationFrame(step);
   };
@@ -958,6 +1070,6 @@ function thumbExercise(ex) {
   if (!tpl) return "";
   return `<svg viewBox="0 0 320 200" class="w-full h-full" aria-hidden="true">
     <g opacity="0.45">${(MACHINES[tpl.machine] || MACHINES.none)()}</g>
-    ${figure(lerpPose(tpl.a, tpl.b, 0.65))}
+    ${figure(lerpPose(tpl.a, tpl.b, 0.65), { prone: tpl.prone })}${kitFor(tpl, lerpPose(tpl.a, tpl.b, 0.65))}
   </svg>`;
 }

@@ -10,6 +10,7 @@ const EXERCISE_MEDIA = {
     "name": "Leverage Incline Chest Press",
     "start": "img/ex/Leverage_Incline_Chest_Press-0.jpg",
     "finish": "img/ex/Leverage_Incline_Chest_Press-1.jpg",
+    "thumb": "img/ex/thumb/Leverage_Incline_Chest_Press.jpg",
     "primary": [
       "chest"
     ],
@@ -22,6 +23,7 @@ const EXERCISE_MEDIA = {
     "name": "Leverage Chest Press",
     "start": "img/ex/Leverage_Chest_Press-0.jpg",
     "finish": "img/ex/Leverage_Chest_Press-1.jpg",
+    "thumb": "img/ex/thumb/Leverage_Chest_Press.jpg",
     "primary": [
       "chest"
     ],
@@ -34,6 +36,7 @@ const EXERCISE_MEDIA = {
     "name": "Dumbbell Bench Press",
     "start": "img/ex/Dumbbell_Bench_Press-0.jpg",
     "finish": "img/ex/Dumbbell_Bench_Press-1.jpg",
+    "thumb": "img/ex/thumb/Dumbbell_Bench_Press.jpg",
     "primary": [
       "chest"
     ],
@@ -46,6 +49,7 @@ const EXERCISE_MEDIA = {
     "name": "Machine Shoulder (Military) Press",
     "start": "img/ex/Machine_Shoulder_Military_Press-0.jpg",
     "finish": "img/ex/Machine_Shoulder_Military_Press-1.jpg",
+    "thumb": "img/ex/thumb/Machine_Shoulder_Military_Press.jpg",
     "primary": [
       "shoulders"
     ],
@@ -57,6 +61,7 @@ const EXERCISE_MEDIA = {
     "name": "Butterfly",
     "start": "img/ex/Butterfly-0.jpg",
     "finish": "img/ex/Butterfly-1.jpg",
+    "thumb": "img/ex/thumb/Butterfly.jpg",
     "primary": [
       "chest"
     ],
@@ -66,6 +71,7 @@ const EXERCISE_MEDIA = {
     "name": "Side Lateral Raise",
     "start": "img/ex/Side_Lateral_Raise-0.jpg",
     "finish": "img/ex/Side_Lateral_Raise-1.jpg",
+    "thumb": "img/ex/thumb/Side_Lateral_Raise.jpg",
     "primary": [
       "shoulders"
     ],
@@ -75,6 +81,7 @@ const EXERCISE_MEDIA = {
     "name": "Triceps Pushdown - Rope Attachment",
     "start": "img/ex/Triceps_Pushdown_-_Rope_Attachment-0.jpg",
     "finish": "img/ex/Triceps_Pushdown_-_Rope_Attachment-1.jpg",
+    "thumb": "img/ex/thumb/Triceps_Pushdown_-_Rope_Attachment.jpg",
     "primary": [
       "triceps"
     ],
@@ -84,6 +91,7 @@ const EXERCISE_MEDIA = {
     "name": "Cable Rope Overhead Triceps Extension",
     "start": "img/ex/Cable_Rope_Overhead_Triceps_Extension-0.jpg",
     "finish": "img/ex/Cable_Rope_Overhead_Triceps_Extension-1.jpg",
+    "thumb": "img/ex/thumb/Cable_Rope_Overhead_Triceps_Extension.jpg",
     "primary": [
       "triceps"
     ],
@@ -93,6 +101,7 @@ const EXERCISE_MEDIA = {
     "name": "Dips - Chest Version",
     "start": "img/ex/Dips_-_Chest_Version-0.jpg",
     "finish": "img/ex/Dips_-_Chest_Version-1.jpg",
+    "thumb": "img/ex/thumb/Dips_-_Chest_Version.jpg",
     "primary": [
       "chest"
     ],
@@ -105,6 +114,7 @@ const EXERCISE_MEDIA = {
     "name": "Pushups",
     "start": "img/ex/Pushups-0.jpg",
     "finish": "img/ex/Pushups-1.jpg",
+    "thumb": "img/ex/thumb/Pushups.jpg",
     "primary": [
       "chest"
     ],
@@ -117,6 +127,7 @@ const EXERCISE_MEDIA = {
     "name": "Wide-Grip Lat Pulldown",
     "start": "img/ex/Wide-Grip_Lat_Pulldown-0.jpg",
     "finish": "img/ex/Wide-Grip_Lat_Pulldown-1.jpg",
+    "thumb": "img/ex/thumb/Wide-Grip_Lat_Pulldown.jpg",
     "primary": [
       "lats"
     ],
@@ -130,6 +141,7 @@ const EXERCISE_MEDIA = {
     "name": "Seated Cable Rows",
     "start": "img/ex/Seated_Cable_Rows-0.jpg",
     "finish": "img/ex/Seated_Cable_Rows-1.jpg",
+    "thumb": "img/ex/thumb/Seated_Cable_Rows.jpg",
     "primary": [
       "middle back"
     ],
@@ -143,6 +155,7 @@ const EXERCISE_MEDIA = {
     "name": "One-Arm Dumbbell Row",
     "start": "img/ex/One-Arm_Dumbbell_Row-0.jpg",
     "finish": "img/ex/One-Arm_Dumbbell_Row-1.jpg",
+    "thumb": "img/ex/thumb/One-Arm_Dumbbell_Row.jpg",
     "primary": [
       "middle back"
     ],
@@ -156,6 +169,7 @@ const EXERCISE_MEDIA = {
     "name": "Rope Straight-Arm Pulldown",
     "start": "img/ex/Rope_Straight-Arm_Pulldown-0.jpg",
     "finish": "img/ex/Rope_Straight-Arm_Pulldown-1.jpg",
+    "thumb": "img/ex/thumb/Rope_Straight-Arm_Pulldown.jpg",
     "primary": [
       "lats"
     ],
@@ -165,6 +179,7 @@ const EXERCISE_MEDIA = {
     "name": "Face Pull",
     "start": "img/ex/Face_Pull-0.jpg",
     "finish": "img/ex/Face_Pull-1.jpg",
+    "thumb": "img/ex/thumb/Face_Pull.jpg",
     "primary": [
       "shoulders"
     ],
@@ -176,6 +191,7 @@ const EXERCISE_MEDIA = {
     "name": "Dumbbell Bicep Curl",
     "start": "img/ex/Dumbbell_Bicep_Curl-0.jpg",
     "finish": "img/ex/Dumbbell_Bicep_Curl-1.jpg",
+    "thumb": "img/ex/thumb/Dumbbell_Bicep_Curl.jpg",
     "primary": [
       "biceps"
     ],
@@ -187,6 +203,7 @@ const EXERCISE_MEDIA = {
     "name": "Preacher Curl",
     "start": "img/ex/Preacher_Curl-0.jpg",
     "finish": "img/ex/Preacher_Curl-1.jpg",
+    "thumb": "img/ex/thumb/Preacher_Curl.jpg",
     "primary": [
       "biceps"
     ],
@@ -196,6 +213,7 @@ const EXERCISE_MEDIA = {
     "name": "Pullups",
     "start": "img/ex/Pullups-0.jpg",
     "finish": "img/ex/Pullups-1.jpg",
+    "thumb": "img/ex/thumb/Pullups.jpg",
     "primary": [
       "lats"
     ],
@@ -208,6 +226,7 @@ const EXERCISE_MEDIA = {
     "name": "Scapular Pull-Up",
     "start": "img/ex/Scapular_Pull-Up-0.jpg",
     "finish": "img/ex/Scapular_Pull-Up-1.jpg",
+    "thumb": "img/ex/thumb/Scapular_Pull-Up.jpg",
     "primary": [
       "traps"
     ],
@@ -220,6 +239,7 @@ const EXERCISE_MEDIA = {
     "name": "Band Pull Apart",
     "start": "img/ex/Band_Pull_Apart-0.jpg",
     "finish": "img/ex/Band_Pull_Apart-1.jpg",
+    "thumb": "img/ex/thumb/Band_Pull_Apart.jpg",
     "primary": [
       "shoulders"
     ],
@@ -232,6 +252,7 @@ const EXERCISE_MEDIA = {
     "name": "Leg Press",
     "start": "img/ex/Leg_Press-0.jpg",
     "finish": "img/ex/Leg_Press-1.jpg",
+    "thumb": "img/ex/thumb/Leg_Press.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -245,6 +266,7 @@ const EXERCISE_MEDIA = {
     "name": "Leg Extensions",
     "start": "img/ex/Leg_Extensions-0.jpg",
     "finish": "img/ex/Leg_Extensions-1.jpg",
+    "thumb": "img/ex/thumb/Leg_Extensions.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -254,6 +276,7 @@ const EXERCISE_MEDIA = {
     "name": "Lying Leg Curls",
     "start": "img/ex/Lying_Leg_Curls-0.jpg",
     "finish": "img/ex/Lying_Leg_Curls-1.jpg",
+    "thumb": "img/ex/thumb/Lying_Leg_Curls.jpg",
     "primary": [
       "hamstrings"
     ],
@@ -263,6 +286,7 @@ const EXERCISE_MEDIA = {
     "name": "Bodyweight Squat",
     "start": "img/ex/Bodyweight_Squat-0.jpg",
     "finish": "img/ex/Bodyweight_Squat-1.jpg",
+    "thumb": "img/ex/thumb/Bodyweight_Squat.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -275,6 +299,7 @@ const EXERCISE_MEDIA = {
     "name": "Goblet Squat",
     "start": "img/ex/Goblet_Squat-0.jpg",
     "finish": "img/ex/Goblet_Squat-1.jpg",
+    "thumb": "img/ex/thumb/Goblet_Squat.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -289,6 +314,7 @@ const EXERCISE_MEDIA = {
     "name": "Stiff-Legged Dumbbell Deadlift",
     "start": "img/ex/Stiff-Legged_Dumbbell_Deadlift-0.jpg",
     "finish": "img/ex/Stiff-Legged_Dumbbell_Deadlift-1.jpg",
+    "thumb": "img/ex/thumb/Stiff-Legged_Dumbbell_Deadlift.jpg",
     "primary": [
       "hamstrings"
     ],
@@ -301,6 +327,7 @@ const EXERCISE_MEDIA = {
     "name": "Split Squat with Dumbbells",
     "start": "img/ex/Split_Squat_with_Dumbbells-0.jpg",
     "finish": "img/ex/Split_Squat_with_Dumbbells-1.jpg",
+    "thumb": "img/ex/thumb/Split_Squat_with_Dumbbells.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -313,6 +340,7 @@ const EXERCISE_MEDIA = {
     "name": "Barbell Hip Thrust",
     "start": "img/ex/Barbell_Hip_Thrust-0.jpg",
     "finish": "img/ex/Barbell_Hip_Thrust-1.jpg",
+    "thumb": "img/ex/thumb/Barbell_Hip_Thrust.jpg",
     "primary": [
       "glutes"
     ],
@@ -325,6 +353,7 @@ const EXERCISE_MEDIA = {
     "name": "Thigh Abductor",
     "start": "img/ex/Thigh_Abductor-0.jpg",
     "finish": "img/ex/Thigh_Abductor-1.jpg",
+    "thumb": "img/ex/thumb/Thigh_Abductor.jpg",
     "primary": [
       "abductors"
     ],
@@ -336,6 +365,7 @@ const EXERCISE_MEDIA = {
     "name": "Standing Dumbbell Calf Raise",
     "start": "img/ex/Standing_Dumbbell_Calf_Raise-0.jpg",
     "finish": "img/ex/Standing_Dumbbell_Calf_Raise-1.jpg",
+    "thumb": "img/ex/thumb/Standing_Dumbbell_Calf_Raise.jpg",
     "primary": [
       "calves"
     ],
@@ -345,6 +375,7 @@ const EXERCISE_MEDIA = {
     "name": "Dead Bug",
     "start": "img/ex/Dead_Bug-0.jpg",
     "finish": "img/ex/Dead_Bug-1.jpg",
+    "thumb": "img/ex/thumb/Dead_Bug.jpg",
     "primary": [
       "abdominals"
     ],
@@ -354,6 +385,7 @@ const EXERCISE_MEDIA = {
     "name": "Butt Lift (Bridge)",
     "start": "img/ex/Butt_Lift_Bridge-0.jpg",
     "finish": "img/ex/Butt_Lift_Bridge-1.jpg",
+    "thumb": "img/ex/thumb/Butt_Lift_Bridge.jpg",
     "primary": [
       "glutes"
     ],
@@ -365,6 +397,7 @@ const EXERCISE_MEDIA = {
     "name": "Plank",
     "start": "img/ex/Plank-0.jpg",
     "finish": "img/ex/Plank-1.jpg",
+    "thumb": "img/ex/thumb/Plank.jpg",
     "primary": [
       "abdominals"
     ],
@@ -374,6 +407,7 @@ const EXERCISE_MEDIA = {
     "name": "Side Bridge",
     "start": "img/ex/Side_Bridge-0.jpg",
     "finish": "img/ex/Side_Bridge-1.jpg",
+    "thumb": "img/ex/thumb/Side_Bridge.jpg",
     "primary": [
       "abdominals"
     ],
@@ -385,6 +419,7 @@ const EXERCISE_MEDIA = {
     "name": "Reverse Crunch",
     "start": "img/ex/Reverse_Crunch-0.jpg",
     "finish": "img/ex/Reverse_Crunch-1.jpg",
+    "thumb": "img/ex/thumb/Reverse_Crunch.jpg",
     "primary": [
       "abdominals"
     ],
@@ -394,6 +429,7 @@ const EXERCISE_MEDIA = {
     "name": "Pallof Press",
     "start": "img/ex/Pallof_Press-0.jpg",
     "finish": "img/ex/Pallof_Press-1.jpg",
+    "thumb": "img/ex/thumb/Pallof_Press.jpg",
     "primary": [
       "abdominals"
     ],
@@ -407,6 +443,7 @@ const EXERCISE_MEDIA = {
     "name": "Cat Stretch",
     "start": "img/ex/Cat_Stretch-0.jpg",
     "finish": "img/ex/Cat_Stretch-1.jpg",
+    "thumb": "img/ex/thumb/Cat_Stretch.jpg",
     "primary": [
       "lower back"
     ],
@@ -419,6 +456,7 @@ const EXERCISE_MEDIA = {
     "name": "Kneeling Hip Flexor",
     "start": "img/ex/Kneeling_Hip_Flexor-0.jpg",
     "finish": "img/ex/Kneeling_Hip_Flexor-1.jpg",
+    "thumb": "img/ex/thumb/Kneeling_Hip_Flexor.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -430,6 +468,7 @@ const EXERCISE_MEDIA = {
     "name": "Seated Floor Hamstring Stretch",
     "start": "img/ex/Seated_Floor_Hamstring_Stretch-0.jpg",
     "finish": "img/ex/Seated_Floor_Hamstring_Stretch-1.jpg",
+    "thumb": "img/ex/thumb/Seated_Floor_Hamstring_Stretch.jpg",
     "primary": [
       "hamstrings"
     ],
@@ -441,6 +480,7 @@ const EXERCISE_MEDIA = {
     "name": "Child's Pose",
     "start": "img/ex/Childs_Pose-0.jpg",
     "finish": "img/ex/Childs_Pose-1.jpg",
+    "thumb": "img/ex/thumb/Childs_Pose.jpg",
     "primary": [
       "lower back"
     ],
@@ -453,6 +493,7 @@ const EXERCISE_MEDIA = {
     "name": "Quadriceps-SMR",
     "start": "img/ex/Quadriceps-SMR-0.jpg",
     "finish": "img/ex/Quadriceps-SMR-1.jpg",
+    "thumb": "img/ex/thumb/Quadriceps-SMR.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -462,6 +503,7 @@ const EXERCISE_MEDIA = {
     "name": "Piriformis-SMR",
     "start": "img/ex/Piriformis-SMR-0.jpg",
     "finish": "img/ex/Piriformis-SMR-1.jpg",
+    "thumb": "img/ex/thumb/Piriformis-SMR.jpg",
     "primary": [
       "glutes"
     ],
@@ -471,6 +513,7 @@ const EXERCISE_MEDIA = {
     "name": "Walking, Treadmill",
     "start": "img/ex/Walking_Treadmill-0.jpg",
     "finish": "img/ex/Walking_Treadmill-1.jpg",
+    "thumb": "img/ex/thumb/Walking_Treadmill.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -484,6 +527,7 @@ const EXERCISE_MEDIA = {
     "name": "Elliptical Trainer",
     "start": "img/ex/Elliptical_Trainer-0.jpg",
     "finish": "img/ex/Elliptical_Trainer-1.jpg",
+    "thumb": "img/ex/thumb/Elliptical_Trainer.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -497,6 +541,7 @@ const EXERCISE_MEDIA = {
     "name": "Bicycling, Stationary",
     "start": "img/ex/Bicycling_Stationary-0.jpg",
     "finish": "img/ex/Bicycling_Stationary-1.jpg",
+    "thumb": "img/ex/thumb/Bicycling_Stationary.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -510,6 +555,7 @@ const EXERCISE_MEDIA = {
     "name": "Rowing, Stationary",
     "start": "img/ex/Rowing_Stationary-0.jpg",
     "finish": "img/ex/Rowing_Stationary-1.jpg",
+    "thumb": "img/ex/thumb/Rowing_Stationary.jpg",
     "primary": [
       "quadriceps"
     ],
@@ -526,6 +572,7 @@ const EXERCISE_MEDIA = {
     "name": "Dumbbell Shoulder Press",
     "start": "img/ex/Dumbbell_Shoulder_Press-0.jpg",
     "finish": "img/ex/Dumbbell_Shoulder_Press-1.jpg",
+    "thumb": "img/ex/thumb/Dumbbell_Shoulder_Press.jpg",
     "primary": [
       "shoulders"
     ],
@@ -537,6 +584,7 @@ const EXERCISE_MEDIA = {
     "name": "Hammer Curls",
     "start": "img/ex/Hammer_Curls-0.jpg",
     "finish": "img/ex/Hammer_Curls-1.jpg",
+    "thumb": "img/ex/thumb/Hammer_Curls.jpg",
     "primary": [
       "biceps"
     ],
