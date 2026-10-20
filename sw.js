@@ -1,4 +1,4 @@
-const CACHE_NAME = "apt-tracker-v3";
+const CACHE_NAME = "apt-tracker-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,7 @@ const ASSETS = [
   "./js/data-workouts.js",
   "./js/data-diet.js",
   "./js/data-apt.js",
+  "./js/data-media.js",
   "./js/figure.js",
   "./js/store.js",
   "./js/app.js"
@@ -31,9 +32,22 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+/* App files are precached above. Exercise photos (5.6 MB) are not — each is
+   cached the first time it is viewed, so a phone only stores the ones used,
+   and they keep working with no signal in the gym afterwards. */
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const isPhoto = new URL(event.request.url).pathname.includes("/img/ex/");
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((res) => {
+        if (isPhoto && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(event.request, copy));
+        }
+        return res;
+      });
+    })
   );
 });

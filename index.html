@@ -345,38 +345,37 @@
         <button onclick="closeModal()" class="shrink-0 bg-slate-800 text-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold">Close</button>
       </div>
 
-      <div class="bg-slate-950 border border-slate-800 rounded-xl p-1">
-        <div id="modalSvgContainer" class="w-full h-52"></div>
+      <!-- Real start/finish photos when available, otherwise the animated diagram -->
+      <div class="bg-black border border-slate-800 rounded-xl overflow-hidden">
+        <div id="modalMedia"></div>
       </div>
-
-      <button id="wrongFormBtn" onclick="toggleWrongForm()" class="w-full py-2.5 rounded-xl text-xs font-bold border bg-slate-800 border-slate-700 text-slate-300">
-        Compare with wrong form
-      </button>
-      <div id="modalWrongWrap" class="hidden bg-red-500/10 border border-red-500/30 rounded-xl p-3">
-        <div class="font-bold text-red-400 uppercase tracking-wider text-[10px] mb-1">The fault on the left</div>
-        <p id="modalWrongNote" class="text-[11px] text-red-100 leading-relaxed"></p>
-      </div>
+      <div id="modalMediaControls" class="grid grid-cols-3 gap-1.5"></div>
+      <p id="modalMuscles" class="text-[11px] text-slate-300 leading-relaxed"></p>
 
       <div class="space-y-2.5">
         <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3">
-          <div class="font-bold text-emerald-400 uppercase tracking-wider text-[10px] mb-1">1. Machine setup</div>
-          <p id="modalSetup" class="text-[11px] text-slate-200 leading-relaxed"></p>
+          <div class="font-bold text-emerald-400 uppercase tracking-wider text-[10px] mb-1.5">1. Set up the machine</div>
+          <ol id="modalSetup" class="space-y-1.5 text-[11.5px] text-slate-200 leading-relaxed"></ol>
         </div>
         <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3">
-          <div class="font-bold text-blue-400 uppercase tracking-wider text-[10px] mb-1">2. Step-by-step execution</div>
-          <p id="modalExecution" class="text-[11px] text-slate-200 leading-relaxed"></p>
+          <div class="font-bold text-blue-400 uppercase tracking-wider text-[10px] mb-1.5">2. Do the rep</div>
+          <ol id="modalExecution" class="space-y-1.5 text-[11.5px] text-slate-200 leading-relaxed"></ol>
         </div>
-        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
-          <div class="font-bold text-amber-400 uppercase tracking-wider text-[10px] mb-1">3. APT posture cue</div>
-          <p id="modalAptCue" class="text-[11px] text-amber-100 leading-relaxed"></p>
+
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 space-y-2">
+          <div class="font-bold text-amber-400 uppercase tracking-wider text-[10px]">3. APT check &mdash; look at your lower back</div>
+          <div id="modalFormCheck"></div>
+          <p id="modalAptCue" class="text-[11.5px] text-amber-100 leading-relaxed"></p>
         </div>
+
         <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-3">
           <div class="font-bold text-red-400 uppercase tracking-wider text-[10px] mb-1">4. Most common mistake</div>
-          <p id="modalMistake" class="text-[11px] text-slate-200 leading-relaxed"></p>
+          <p id="modalWrongNote" class="text-[11.5px] text-red-100 font-semibold leading-relaxed"></p>
+          <p id="modalMistake" class="text-[11.5px] text-slate-300 leading-relaxed mt-1"></p>
         </div>
         <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3">
           <div class="font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">5. If the machine is taken</div>
-          <p id="modalSubstitute" class="text-[11px] text-slate-200 leading-relaxed"></p>
+          <p id="modalSubstitute" class="text-[11.5px] text-slate-200 leading-relaxed"></p>
         </div>
       </div>
 
@@ -384,6 +383,7 @@
          class="block w-full text-center bg-red-600 active:bg-red-500 text-white font-bold text-xs py-3 rounded-xl shadow-lg">
         Watch video demonstrations (YouTube)
       </a>
+      <p id="modalCredit" class="text-[9px] text-slate-600 text-center"></p>
     </div>
   </div>
 
@@ -417,6 +417,7 @@
   <script src="js/data-workouts.js"></script>
   <script src="js/data-diet.js"></script>
   <script src="js/data-apt.js"></script>
+  <script src="js/data-media.js"></script>
   <script src="js/figure.js"></script>
   <script src="js/store.js"></script>
   <script src="js/app.js"></script>

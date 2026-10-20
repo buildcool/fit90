@@ -68,7 +68,7 @@ function spine(j, p, bad) {
   const tilt = p.tilt || 0;
   const mx = (j.pelvis.x + j.shoulder.x) / 2, my = (j.pelvis.y + j.shoulder.y) / 2;
   const a = Math.atan2(j.shoulder.y - j.pelvis.y, j.shoulder.x - j.pelvis.x);
-  const bend = tilt * 0.55;
+  const bend = tilt * 0.85;
   const cx = mx - Math.sin(a) * bend, cy = my + Math.cos(a) * bend;
   return `<path d="M${j.pelvis.x.toFixed(1)},${j.pelvis.y.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${j.shoulder.x.toFixed(1)},${j.shoulder.y.toFixed(1)}"
     fill="none" stroke="${bad ? C.spineBad : C.spineOk}" stroke-width="3" stroke-linecap="round" opacity="0.95"/>`;
@@ -402,6 +402,7 @@ const ANIM = {
     kit: j => dumbbell(j.wrist, 5) + dumbbell(j.wristB, 5)
   },
   preacherCurl: {
+    faultPic: false,
     machine: "preacher", caption: "Upper arms fixed on the pad • 3s to a straight arm",
     a: { x: 130, y: 122, tilt: 0, torso: -74, head: -70, arm: 40, farm: 42, armB: 44, farmB: 46, thigh: 4, shin: 78, foot: 14 },
     b: { x: 130, y: 122, tilt: 0, torso: -74, head: -70, arm: 40, farm: -58, armB: 44, farmB: -54, thigh: 4, shin: 78, foot: 14 },
@@ -424,6 +425,7 @@ const ANIM = {
     parts: [{ x: 152, y: 14, t: "bar" }]
   },
   bandPullApart: {
+    faultPic: false,
     machine: "floor", caption: "Pull apart • squeeze the blades back and down",
     a: { x: 150, y: 104, tilt: 0, torso: -90, head: -88, arm: -6, farm: -4, armB: -2, farmB: 0, thigh: 88, shin: 90, foot: 0, thighB: 92, shinB: 90 },
     b: { x: 150, y: 104, tilt: 0, torso: -90, head: -88, arm: -34, farm: -30, armB: 26, farmB: 22, thigh: 88, shin: 90, foot: 0, thighB: 92, shinB: 90 },
@@ -433,6 +435,8 @@ const ANIM = {
 
   /* ---------------- legs ---------------- */
   legPress: {
+    faultAt: "a",
+    wrong: { x: 110, y: 122, tilt: -30, torso: -118, head: -104, arm: -40, farm: -20, armB: -36, farmB: -16, thigh: -54, shin: 22, foot: -58, thighB: -48, shinB: 28 },
     machine: "legPress", caption: "Feet high on the platform • drive through the heels",
     a: { x: 110, y: 120, tilt: 0, torso: -108, head: -100, arm: -40, farm: -20, armB: -36, farmB: -16, thigh: -44, shin: 28, foot: -58, thighB: -38, shinB: 34 },
     b: { x: 110, y: 120, tilt: 0, torso: -108, head: -100, arm: -40, farm: -20, armB: -36, farmB: -16, thigh: -26, shin: -20, foot: -58, thighB: -22, shinB: -16 },
@@ -454,13 +458,15 @@ const ANIM = {
     parts: [{ x: 96, y: 100, t: "pubic bone pressed down" }, { x: 240, y: 112, t: "roller on calves" }]
   },
   squat: {
+    wrong: { x: 150, y: 136, tilt: -28, torso: -60, head: -56, arm: -18, farm: -14, armB: -14, farmB: -10, thigh: 31, shin: 151, foot: 0, thighB: 26, shinB: 146 },
     machine: "floor", caption: "Sit between the hips • chest tall • squeeze the glutes at the top",
     a: { x: 150, y: 100, tilt: 0, torso: -88, head: -86, arm: -8, farm: -6, armB: -4, farmB: -2, thigh: 86, shin: 92, foot: 0, thighB: 90, shinB: 90 },
     b: { x: 150, y: 134, tilt: 0, torso: -74, head: -78, arm: -18, farm: -14, armB: -14, farmB: -10, thigh: 31, shin: 151, foot: 0, thighB: 26, shinB: 146 },
-    wrongNote: "Knees caving in, or the pelvis tucking under at the bottom",
+    wrongNote: "Pelvis tucking under at the bottom (\"butt wink\") so the lower back rounds \u2014 stop just above that depth",
     hold: false
   },
   gobletSquat: {
+    wrong: { x: 150, y: 136, tilt: -28, torso: -58, head: -48, arm: 84, farm: -18, armB: 88, farmB: -14, thigh: 31, shin: 151, foot: 0, thighB: 26, shinB: 146 },
     machine: "floor", caption: "Weight at the chest as a counterbalance • sit straight down",
     a: { x: 150, y: 100, tilt: 0, torso: -88, head: -86, arm: 62, farm: -46, armB: 66, farmB: -42, thigh: 86, shin: 92, foot: 0, thighB: 90, shinB: 90 },
     b: { x: 150, y: 134, tilt: 0, torso: -76, head: -80, arm: 62, farm: -46, armB: 66, farmB: -42, thigh: 31, shin: 151, foot: 0, thighB: 26, shinB: 146 },
@@ -469,6 +475,7 @@ const ANIM = {
     parts: [{ x: 196, y: 70, t: "held like a goblet" }]
   },
   rdl: {
+    wrong: { x: 166, y: 106, tilt: -30, torso: -20, head: 30, arm: 86, farm: 88, armB: 90, farmB: 92, thigh: 96, shin: 84, foot: -4, thighB: 100, shinB: 82 },
     machine: "floor", caption: "Hips push back • bar slides down the shins • squeeze glutes to stand",
     a: { x: 150, y: 102, tilt: 0, torso: -88, head: -86, arm: 88, farm: 88, armB: 92, farmB: 92, thigh: 88, shin: 90, foot: 0, thighB: 92, shinB: 90 },
     b: { x: 166, y: 106, tilt: 0, torso: -28, head: -24, arm: 86, farm: 88, armB: 90, farmB: 92, thigh: 96, shin: 84, foot: -4, thighB: 100, shinB: 82 },
@@ -477,6 +484,7 @@ const ANIM = {
     parts: [{ x: 120, y: 60, t: "spine stays neutral" }]
   },
   splitSquat: {
+    faultPic: false,
     machine: "benchBehind", caption: "Back foot on the bench • drive through the front heel",
     a: { x: 130, y: 102, tilt: 0, torso: -82, head: -80, arm: 86, farm: 88, armB: 90, farmB: 92, thigh: 76, shin: 104, foot: 0, thighB: 19, shinB: -2, footB: 10 },
     b: { x: 130, y: 126, tilt: 0, torso: -78, head: -76, arm: 86, farm: 88, armB: 90, farmB: 92, thigh: 39, shin: 143, foot: 0, thighB: -5, shinB: -19, footB: 10 },
@@ -493,6 +501,7 @@ const ANIM = {
     parts: [{ x: 60, y: 96, t: "upper back on bench" }]
   },
   hipAbduction: {
+    faultPic: false,
     machine: "abduction", caption: "Knees push apart • 1s squeeze at the widest point",
     a: { x: 128, y: 122, tilt: 0, torso: -80, head: -76, arm: 54, farm: 40, armB: 58, farmB: 44, thigh: 2, shin: 76, foot: 10, thighB: 10, shinB: 80 },
     b: { x: 128, y: 122, tilt: 0, torso: -80, head: -76, arm: 54, farm: 40, armB: 58, farmB: 44, thigh: -10, shin: 70, foot: 10, thighB: 24, shinB: 90 },
@@ -573,6 +582,7 @@ const ANIM = {
     parts: [{ x: 234, y: 112, t: "stop at hip height" }]
   },
   reverseCrunch: {
+    faultPic: false,
     machine: "mat", caption: "Roll the pelvis back to bring the knees in • 3s lower",
     a: { x: 150, y: 150, tilt: 4, torso: 180, head: 176, arm: 170, farm: 168, armB: 174, farmB: 172, thigh: -56, shin: 44, foot: 90, thighB: -52, shinB: 48 },
     b: { x: 150, y: 150, tilt: -14, torso: 176, head: 174, arm: 170, farm: 168, armB: 174, farmB: 172, thigh: -110, shin: -10, foot: 60, thighB: -106, shinB: -6 },
@@ -587,6 +597,7 @@ const ANIM = {
     kit: j => cableTo({ x: 253, y: 96 }, j.wrist)
   },
   catCamel: {
+    faultPic: false,
     machine: "mat", caption: "Round up, tailbone tucked • then slowly reverse • 3s each way",
     a: { x: 160, y: 131, tilt: -18, torso: 192, head: 232, arm: 81, farm: 112, armB: 83, farmB: 114, thigh: 90, shin: 8, foot: 0, thighB: 90, shinB: 8 },
     b: { x: 160, y: 131, tilt: 20, torso: 192, head: 178, arm: 81, farm: 112, armB: 83, farmB: 114, thigh: 90, shin: 8, foot: 0, thighB: 90, shinB: 8 },
@@ -670,6 +681,7 @@ const ANIM = {
     parts: [{ x: 94, y: 136, t: "back flat on mat" }]
   },
   childPose: {
+    faultPic: false,
     machine: "mat", caption: "Sink the hips back • breathe into the lower back • 60s",
     hold: true,
     a: { x: 168, y: 142, tilt: 0, torso: 170, head: 166, arm: 172, farm: 176, armB: 176, farmB: 178, thigh: 74, shin: 170, foot: 100, thighB: 78, shinB: 172 },
@@ -695,6 +707,7 @@ const ANIM = {
     parts: [{ x: 226, y: 92, t: "hold at waist height" }]
   },
   thoracicOpener: {
+    faultPic: false,
     machine: "roller", caption: "Extend over the roller • MID-back only • 10 reps + 30s hold",
     a: { x: 150, y: 142, tilt: 0, torso: 186, head: 182, arm: 150, farm: 196, armB: 154, farmB: 200, thigh: -40, shin: 84, foot: 0, thighB: -36, shinB: 88 },
     b: { x: 150, y: 144, tilt: -4, torso: 196, head: 206, arm: 150, farm: 200, armB: 154, farmB: 204, thigh: -40, shin: 84, foot: 0, thighB: -36, shinB: 88 },
@@ -702,6 +715,7 @@ const ANIM = {
     parts: [{ x: 214, y: 174, t: "roller across mid-back" }]
   },
   foamRollQuad: {
+    faultPic: false,
     machine: "roller", caption: "Slow • pause and breathe out on the tender spots",
     a: { x: 118, y: 130, tilt: 0, torso: 158, head: 150, arm: 70, farm: 88, armB: 74, farmB: 90, thigh: 12, shin: 6, foot: 60, thighB: 16, shinB: 10 },
     b: { x: 142, y: 130, tilt: 0, torso: 158, head: 150, arm: 70, farm: 88, armB: 74, farmB: 90, thigh: 12, shin: 6, foot: 60, thighB: 16, shinB: 10 },
@@ -709,6 +723,7 @@ const ANIM = {
     parts: [{ x: 206, y: 176, t: "roller under front of thigh" }]
   },
   foamRollGlute: {
+    faultPic: false,
     machine: "roller", caption: "Sit on the roller, ankle crossed over the knee • 90s per side",
     a: { x: 174, y: 136, tilt: 0, torso: -108, head: -104, arm: 58, farm: 70, armB: 62, farmB: 74, thigh: 150, shin: 120, foot: 60, thighB: 120, shinB: 150 },
     b: { x: 182, y: 138, tilt: 0, torso: -108, head: -104, arm: 58, farm: 70, armB: 62, farmB: 74, thigh: 150, shin: 120, foot: 60, thighB: 120, shinB: 150 },
@@ -718,6 +733,7 @@ const ANIM = {
 
   /* ---------------- cardio & misc ---------------- */
   treadmillWalk: {
+    faultPic: false,
     machine: "treadmill", caption: "Tall posture • ribs over pelvis • hands OFF the rails",
     a: { x: 150, y: 110, tilt: 0, torso: -88, head: -86, arm: 62, farm: 40, armB: 118, farmB: 140, thigh: 62, shin: 100, foot: 10, thighB: 112, shinB: 86, footB: -10 },
     b: { x: 150, y: 108, tilt: 0, torso: -88, head: -86, arm: 118, farm: 140, armB: 62, farmB: 40, thigh: 112, shin: 86, foot: -10, thighB: 62, shinB: 100, footB: 10 },
@@ -725,6 +741,7 @@ const ANIM = {
     hold: false
   },
   crossTrainer: {
+    faultPic: false,
     machine: "bike", caption: "Upright, conversational pace • do not hang off the handles",
     a: { x: 150, y: 104, tilt: 0, torso: -88, head: -86, arm: 40, farm: 20, armB: 110, farmB: 130, thigh: 66, shin: 104, foot: 0, thighB: 114, shinB: 82 },
     b: { x: 150, y: 104, tilt: 0, torso: -88, head: -86, arm: 110, farm: 130, armB: 40, farmB: 20, thigh: 114, shin: 82, foot: 0, thighB: 66, shinB: 104 },
@@ -732,6 +749,8 @@ const ANIM = {
     hold: false
   },
   bikeCycle: {
+    faultAt: "a",
+    wrong: { x: 156, y: 114, tilt: -26, torso: -108, head: -82, arm: -16, farm: -20, armB: -12, farmB: -16, thigh: 20, shin: 96, foot: 10, thighB: 60, shinB: 40 },
     machine: "bike", caption: "Sit on the sit bones • easy 5 minutes",
     a: { x: 156, y: 112, tilt: 0, torso: -96, head: -88, arm: -16, farm: -20, armB: -12, farmB: -16, thigh: 20, shin: 96, foot: 10, thighB: 60, shinB: 40 },
     b: { x: 156, y: 112, tilt: 0, torso: -96, head: -88, arm: -16, farm: -20, armB: -12, farmB: -16, thigh: 60, shin: 40, foot: 10, thighB: 20, shinB: 96 },
@@ -739,6 +758,8 @@ const ANIM = {
     hold: false
   },
   rower: {
+    faultAt: "a",
+    wrong: { x: 132, y: 126, tilt: -28, torso: -60, head: -30, arm: -6, farm: -2, armB: -2, farmB: 2, thigh: 10, shin: 160, foot: 10 },
     machine: "rower", caption: "Hinge from the hips with a neutral spine • legs, then back, then arms",
     a: { x: 132, y: 126, tilt: 0, torso: -76, head: -72, arm: -6, farm: -2, armB: -2, farmB: 2, thigh: 10, shin: 160, foot: 10 },
     b: { x: 160, y: 126, tilt: 0, torso: -104, head: -98, arm: 150, farm: 10, armB: 154, farmB: 14, thigh: 2, shin: 4, foot: -40 },
@@ -753,6 +774,7 @@ const ANIM = {
     hold: false
   },
   checkIn: {
+    faultPic: false,
     machine: "scale", caption: "Same day, same time, same conditions — then judge the 7-day average",
     hold: true,
     a: { x: 160, y: 106, tilt: 0, torso: -90, head: -88, arm: 86, farm: 88, armB: 92, farmB: 90, thigh: 90, shin: 90, foot: 0, thighB: 92, shinB: 90 },
@@ -761,6 +783,7 @@ const ANIM = {
     parts: [{ x: 160, y: 148, t: "before food or water" }]
   },
   prep: {
+    faultPic: false,
     machine: "floor", caption: "The half hour that makes the other six days possible",
     hold: true,
     a: { x: 150, y: 108, tilt: 0, torso: -88, head: -84, arm: 50, farm: 20, armB: 92, farmB: 90, thigh: 90, shin: 90, foot: 0, thighB: 92, shinB: 90 },
@@ -771,7 +794,7 @@ const ANIM = {
 };
 
 /* ==========================================================================
-   Rendering + the animation loop
+   Rendering
    ========================================================================== */
 
 const LERP_KEYS = ["x", "y", "tilt", "torso", "head", "arm", "farm", "armB", "farmB",
@@ -791,9 +814,20 @@ function lerpPose(a, b, t) {
 
 const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 
-/* Derive a plausible faulty pose when a template does not define one. */
+/* A faulty pose when a template does not define one: the lower back arched. */
 function deriveWrong(pose) {
-  return { ...pose, tilt: (pose.tilt || 0) + 24, torso: pose.torso + (pose.torso < 0 ? -5 : 5) };
+  return { ...pose, tilt: (pose.tilt || 0) + 26, torso: pose.torso + (pose.torso < 0 ? -5 : 5) };
+}
+
+/* The pose the fault is shown at, and the faulty version of it. */
+function faultPoses(tpl) {
+  const good = tpl.faultAt === "a" ? tpl.a : tpl.b;
+  return { good, bad: tpl.wrong || deriveWrong(good) };
+}
+
+/* Read the fault off the pelvis so the label always matches the picture. */
+function faultKind(good, bad) {
+  return (bad.tilt || 0) >= (good.tilt || 0) ? "arched" : "rounded";
 }
 
 function partLabels(parts) {
@@ -805,6 +839,71 @@ function partLabels(parts) {
   ).join("");
 }
 
+/* A viewBox that frames the body rather than the whole 320x200 scene, so
+   the figure is large enough to read in a half-width panel. */
+function frameFor(poses) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const p of poses) {
+    for (const q of Object.values(joints(p))) {
+      x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y);
+      x1 = Math.max(x1, q.x); y1 = Math.max(y1, q.y);
+    }
+  }
+  const pad = 26;
+  let w = Math.max(150, x1 - x0 + pad * 2), h = Math.max(112, y1 - y0 + pad * 2);
+  if (w / h > 4 / 3) h = w * 3 / 4; else w = h * 4 / 3;
+  let x = (x0 + x1) / 2 - w / 2, y = (y0 + y1) / 2 - h / 2;
+  x = Math.max(0, Math.min(320 - w, x));
+  y = Math.max(0, Math.min(200 - h, y));
+  return `${x.toFixed(1)} ${y.toFixed(1)} ${Math.min(320, w).toFixed(1)} ${Math.min(200, h).toFixed(1)}`;
+}
+
+/* Dashed ring around the lumbar spine — where to look. */
+function lumbarRing(p, color) {
+  const j = joints(p);
+  const cx = j.pelvis.x + (j.shoulder.x - j.pelvis.x) * 0.38;
+  const cy = j.pelvis.y + (j.shoulder.y - j.pelvis.y) * 0.38;
+  return `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="22" fill="none"
+    stroke="${color}" stroke-width="2.5" stroke-dasharray="5 3"/>`;
+}
+
+/**
+ * Correct vs wrong as two SEPARATE panels, each with its own machine, the
+ * same framing, and the lower back circled. Static on purpose: two figures
+ * moving at once is hard to compare; one frozen moment is not.
+ * Returns false when the fault is not about posture (text-only then).
+ */
+function drawFormCheck(ex, host) {
+  const tpl = ANIM[ex && ex.anim];
+  if (!tpl || tpl.faultPic === false) { host.innerHTML = ""; return false; }
+  const { good, bad } = faultPoses(tpl);
+  const kind = faultKind(good, bad);
+  const vb = frameFor([good, bad]);
+  const machine = (MACHINES[tpl.machine] || MACHINES.none)();
+  const panel = (pose, isBad) => `
+    <svg viewBox="${vb}" class="w-full h-auto block" role="img"
+      aria-label="${isBad ? "Wrong" : "Correct"} form: lower back ${isBad ? kind : "neutral"}">
+      <rect x="-10" y="-10" width="340" height="220" fill="${isBad ? "#1c0b0b" : "#071a12"}"/>
+      ${machine}
+      ${figure(pose, { bad: isBad })}
+      ${lumbarRing(pose, isBad ? "#fca5a5" : "#6ee7b7")}
+    </svg>`;
+  host.innerHTML = `
+    <div class="grid grid-cols-2 gap-2">
+      <figure class="rounded-lg overflow-hidden border-2 border-emerald-500/70 bg-slate-950">
+        ${panel(good, false)}
+        <figcaption class="text-[10px] font-extrabold text-emerald-300 bg-emerald-500/15 px-2 py-1.5 leading-tight">
+          ✓ CORRECT<span class="block font-semibold text-emerald-200/80">Lower back neutral</span></figcaption>
+      </figure>
+      <figure class="rounded-lg overflow-hidden border-2 border-red-500/70 bg-slate-950">
+        ${panel(bad, true)}
+        <figcaption class="text-[10px] font-extrabold text-red-300 bg-red-500/15 px-2 py-1.5 leading-tight">
+          ✗ WRONG<span class="block font-semibold text-red-200/80">Lower back ${kind}</span></figcaption>
+      </figure>
+    </div>`;
+  return true;
+}
+
 /* The tempo timeline. Holds breathe; reps move on a real 1-1-3 tempo. */
 function phasesFor(tpl) {
   return tpl.hold
@@ -813,57 +912,33 @@ function phasesFor(tpl) {
 }
 
 /**
- * Draw and animate one exercise into a container element.
- * @param {object} ex       exercise object (uses ex.anim, ex.name, ex.machine)
- * @param {Element} host    container to render into
- * @param {object} opts     { showWrong: boolean }
+ * Animated diagram of the correct movement. Used for the drills that have
+ * no faithful photo (bird dog, pelvic tilt, 90/90 breathing, wall drills...).
  */
-function drawExercise(ex, host, opts = {}) {
+function drawExercise(ex, host) {
   stopExercise(host);
   const tpl = ANIM[ex && ex.anim] || null;
-
   if (!tpl) {
     host.innerHTML = `<div class="text-[11px] text-slate-500 py-8 text-center">
-      No animation for this item — follow the written steps below.</div>`;
+      No diagram for this item — follow the numbered steps below.</div>`;
     return;
   }
-
   const machine = (MACHINES[tpl.machine] || MACHINES.none)();
-  const wrongPose = tpl.wrong || deriveWrong(tpl.b);
-  const showWrong = !!opts.showWrong;
-
   host.innerHTML = `
-    <svg viewBox="0 0 320 200" class="w-full h-full" role="img" aria-label="${ex.name} form animation">
-      <g id="fx-machine">${machine}</g>
-      <g id="fx-wrong" opacity="${showWrong ? 1 : 0}"></g>
-      <g id="fx-body"></g>
-      <g id="fx-parts">${partLabels(tpl.parts)}</g>
-      <text x="160" y="193" text-anchor="middle" fill="${C.label}" font-size="9.5">${tpl.caption || ""}</text>
-      <g id="fx-badge" opacity="${showWrong ? 1 : 0}">
-        <rect x="6" y="6" width="96" height="16" rx="4" fill="#7f1d1d" opacity="0.9"/>
-        <text x="54" y="17.5" text-anchor="middle" fill="#fecaca" font-size="9" font-weight="bold">✗ WRONG FORM</text>
-        <rect x="218" y="6" width="96" height="16" rx="4" fill="#065f46" opacity="0.9"/>
-        <text x="266" y="17.5" text-anchor="middle" fill="#a7f3d0" font-size="9" font-weight="bold">✓ CORRECT</text>
-      </g>
+    <svg viewBox="${frameFor([tpl.a, tpl.b])}" class="w-full h-full" role="img" aria-label="${ex.name} diagram">
+      <rect x="-10" y="-10" width="340" height="220" fill="#020617"/>
+      <g>${machine}</g>
+      <g class="fx-body"></g>
+      <g>${partLabels(tpl.parts)}</g>
     </svg>`;
-
-  const bodyG = host.querySelector("#fx-body");
-  const wrongG = host.querySelector("#fx-wrong");
+  const bodyG = host.querySelector(".fx-body");
   const phases = phasesFor(tpl);
-
-  // The faulty figure animates the same way, shifted left, so the two compare.
-  const wrongA = { ...(tpl.wrong ? tpl.a : deriveWrong(tpl.a)), x: (tpl.wrong ? tpl.a.x : tpl.a.x) - 74 };
-  const wrongB = { ...wrongPose, x: wrongPose.x - 74 };
-  const okA = showWrong ? { ...tpl.a, x: tpl.a.x + 62 } : tpl.a;
-  const okB = showWrong ? { ...tpl.b, x: tpl.b.x + 62 } : tpl.b;
-
   let pi = 0, t0 = performance.now(), from = 0;
   const step = now => {
     const ph = phases[pi];
     const k = Math.min(1, (now - t0) / ph.ms);
     const t = from + (ph.to - from) * easeInOut(k);
-    bodyG.innerHTML = figure(lerpPose(okA, okB, t), { showHands: true });
-    if (showWrong) wrongG.innerHTML = figure(lerpPose(wrongA, wrongB, t), { bad: true });
+    bodyG.innerHTML = figure(lerpPose(tpl.a, tpl.b, t), { showHands: true });
     if (k >= 1) { from = ph.to; pi = (pi + 1) % phases.length; t0 = now; }
     host._fxHandle = requestAnimationFrame(step);
   };

@@ -10,7 +10,6 @@ let selectedWorkoutDay = 1;
 let deferredPrompt = null;
 let restTimer = null;
 let modalExerciseId = null;
-let modalShowWrong = false;
 let planSection = "overview";
 
 const TABS = ["workout", "schedule", "diet", "apt", "metrics", "plan"];
@@ -213,7 +212,7 @@ function exerciseCard(ex, t) {
   return `
     <div class="bg-slate-900 border ${allDone ? "border-emerald-500/50" : "border-slate-800"} rounded-xl p-3 space-y-2.5">
       <div class="flex items-start gap-2.5">
-        <div class="shrink-0 w-14 h-11 bg-slate-950 rounded-lg border border-slate-800 overflow-hidden">${thumbExercise(ex)}</div>
+        <div class="shrink-0 w-16 h-12 bg-slate-950 rounded-lg border border-slate-800 overflow-hidden">${cardThumb(ex)}</div>
         <div class="min-w-0 flex-1">
           <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30">${esc(ex.machine)}</span>
           <h4 class="text-sm font-extrabold text-white mt-1 leading-tight">${esc(ex.name)}</h4>
@@ -243,6 +242,13 @@ function exerciseCard(ex, t) {
 
       <div class="${ex.log ? "space-y-1.5" : "flex gap-2"} pt-0.5">${setRows}</div>
     </div>`;
+}
+
+function cardThumb(ex) {
+  const m = getExerciseMedia(ex);
+  return m
+    ? `<img src="${m.finish}" alt="" loading="lazy" class="w-full h-full object-cover" onerror="this.outerHTML=''" />`
+    : thumbExercise(ex);
 }
 
 function toggleSetDone(exId, idx, restSec) {
@@ -888,54 +894,140 @@ function printPlan() {
 }
 
 /* ------------------------------------------------------------ tutorial modal */
+let photoTimer = null;
+let photoIdx = 0;
+
+/* "Sentence one. Sentence two." -> numbered steps you can follow one at a time. */
+function toSteps(text) {
+  return String(text || "").split(/(?<=[.!?])\s+(?=[A-Z0-9])/).map(t => t.trim()).filter(Boolean);
+}
+
+function stepList(text) {
+  return toSteps(text).map((t, i) => `
+    <li class="flex gap-2"><span class="shrink-0 w-5 h-5 rounded-full bg-slate-700 text-slate-200 text-[10px] font-extrabold flex items-center justify-center">${i + 1}</span>
+    <span>${esc(t)}</span></li>`).join("");
+}
+
+function titleCase(s) { return String(s).replace(/\b\w/g, c => c.toUpperCase()); }
+
 function openTutorial(exId) {
   const found = findExercise(exId);
   if (!found) return;
   const ex = found.exercise;
   modalExerciseId = exId;
-  modalShowWrong = false;
   const p = getPrescription(getProgramDayNumber(currentDateStr), ex);
+  const tpl = ANIM[ex.anim];
+  const media = getExerciseMedia(ex);
 
   document.getElementById("modalMachine").textContent = ex.machine;
   document.getElementById("modalTitle").textContent = ex.name;
   document.getElementById("modalPrescription").textContent =
     `${p.sets} set${p.sets === 1 ? "" : "s"} × ${p.reps}${p.fixed ? "" : ` @ RPE ${p.rpe}`}${p.restSec ? ` • rest ${p.restSec}s` : ""} • ${p.tempo}`;
-  document.getElementById("modalSetup").textContent = ex.setup;
-  document.getElementById("modalExecution").textContent = ex.exec;
+  document.getElementById("modalSetup").innerHTML = stepList(ex.setup);
+  document.getElementById("modalExecution").innerHTML = stepList(ex.exec);
   document.getElementById("modalAptCue").textContent = ex.apt;
+  document.getElementById("modalWrongNote").textContent = tpl && tpl.wrongNote ? "✗ " + tpl.wrongNote : "";
   document.getElementById("modalMistake").textContent = ex.mistake;
   document.getElementById("modalSubstitute").textContent = ex.substitute;
   document.getElementById("modalVideoBtn").href = ex.video;
 
-  const tpl = ANIM[ex.anim];
-  document.getElementById("modalWrongNote").textContent = tpl ? (tpl.wrongNote || "") : "";
+  const muscles = document.getElementById("modalMuscles");
+  muscles.innerHTML = media && media.primary.length
+    ? `<strong class="text-emerald-400">Works:</strong> ${esc(media.primary.map(titleCase).join(", "))}` +
+      (media.secondary.length ? ` <span class="text-slate-500">• helped by ${esc(media.secondary.join(", "))}</span>` : "")
+    : "";
+  document.getElementById("modalCredit").textContent = media
+    ? `Photos: free-exercise-db (public domain) — "${media.name}". Machines may look different from Cult's; the movement is the same.`
+    : "";
+
+  const hasCheck = drawFormCheck(ex, document.getElementById("modalFormCheck"));
+  document.getElementById("modalFormCheck").classList.toggle("hidden", !hasCheck);
 
   document.getElementById("tutorialModal").classList.remove("hidden");
-  drawExercise(ex, document.getElementById("modalSvgContainer"), { showWrong: false });
-  syncWrongButton();
+  if (media) showPhotos(media); else showDiagram(ex);
 }
 
-function toggleWrongForm() {
-  modalShowWrong = !modalShowWrong;
+function showPhotos(media) {
+  const host = document.getElementById("modalMedia");
+  host.innerHTML = `
+    <div class="relative w-full" style="aspect-ratio: 3 / 2">
+      <img id="ph0" src="${media.start}" alt="Start position" onerror="photoFailed()"
+        class="absolute inset-0 w-full h-full object-contain transition-opacity duration-500" style="opacity:1" />
+      <img id="ph1" src="${media.finish}" alt="Finish position" onerror="photoFailed()"
+        class="absolute inset-0 w-full h-full object-contain transition-opacity duration-500" style="opacity:0" />
+      <span id="phBadge" class="absolute top-2 left-2 text-[11px] font-extrabold px-2 py-1 rounded-md bg-emerald-500 text-slate-950 shadow">① START</span>
+    </div>`;
+  document.getElementById("modalMediaControls").innerHTML = `
+    <button id="phBtn0" onclick="photoStep(0)">① Start</button>
+    <button id="phBtn1" onclick="photoStep(1)">② Finish</button>
+    <button id="phBtnPlay" onclick="photoPlay()">▶ Play</button>`;
+  photoIdx = 0;
+  photoPlay(true);
+}
+
+function photoShow(i) {
+  photoIdx = i;
+  const a = document.getElementById("ph0"), b = document.getElementById("ph1");
+  const badge = document.getElementById("phBadge");
+  if (!a || !b || !badge) return;
+  a.style.opacity = i ? "0" : "1";
+  b.style.opacity = i ? "1" : "0";
+  badge.textContent = i ? "② FINISH" : "① START";
+  badge.className = "absolute top-2 left-2 text-[11px] font-extrabold px-2 py-1 rounded-md shadow " +
+    (i ? "bg-blue-500 text-white" : "bg-emerald-500 text-slate-950");
+  syncPhotoButtons();
+}
+
+function photoStep(i) {
+  stopPhotoLoop();
+  photoShow(i);
+}
+
+/* Alternate start <-> finish so the movement reads like a slow-motion clip. */
+function photoPlay(force) {
+  if (photoTimer && !force) { stopPhotoLoop(); syncPhotoButtons(); return; }
+  stopPhotoLoop();
+  photoShow(photoIdx);
+  photoTimer = setInterval(() => photoShow(1 - photoIdx), 1700);
+  syncPhotoButtons();
+}
+
+function stopPhotoLoop() {
+  clearInterval(photoTimer);
+  photoTimer = null;
+}
+
+function syncPhotoButtons() {
+  const base = "py-2 rounded-lg text-[11px] font-bold border ";
+  const on = "bg-emerald-500/20 border-emerald-500/60 text-emerald-200";
+  const off = "bg-slate-800 border-slate-700 text-slate-300";
+  const b0 = document.getElementById("phBtn0"), b1 = document.getElementById("phBtn1"), bp = document.getElementById("phBtnPlay");
+  if (!b0) return;
+  b0.className = base + (!photoTimer && photoIdx === 0 ? on : off);
+  b1.className = base + (!photoTimer && photoIdx === 1 ? on : off);
+  bp.className = base + (photoTimer ? on : off);
+  bp.textContent = photoTimer ? "❚❚ Pause" : "▶ Play";
+}
+
+/* Offline before the photos were ever cached: fall back to the diagram. */
+function photoFailed() {
   const found = findExercise(modalExerciseId);
-  if (!found) return;
-  drawExercise(found.exercise, document.getElementById("modalSvgContainer"), { showWrong: modalShowWrong });
-  syncWrongButton();
+  if (found) showDiagram(found.exercise);
 }
 
-function syncWrongButton() {
-  const btn = document.getElementById("wrongFormBtn");
-  const note = document.getElementById("modalWrongWrap");
-  btn.textContent = modalShowWrong ? "✓ Showing wrong vs correct" : "✗ Compare with wrong form";
-  btn.className = "w-full py-2.5 rounded-xl text-xs font-bold border " + (modalShowWrong
-    ? "bg-red-500/20 border-red-500/50 text-red-200"
-    : "bg-slate-800 border-slate-700 text-slate-300");
-  note.classList.toggle("hidden", !modalShowWrong);
+function showDiagram(ex) {
+  stopPhotoLoop();
+  const host = document.getElementById("modalMedia");
+  host.innerHTML = `<div id="modalDiagram" class="w-full" style="aspect-ratio: 4 / 3"></div>`;
+  document.getElementById("modalMediaControls").innerHTML = "";
+  drawExercise(ex, document.getElementById("modalDiagram"));
 }
 
 function closeModal() {
-  stopExercise(document.getElementById("modalSvgContainer"));
+  stopPhotoLoop();
+  stopExercise(document.getElementById("modalDiagram"));
   document.getElementById("tutorialModal").classList.add("hidden");
+  document.getElementById("modalMedia").innerHTML = "";
   modalExerciseId = null;
 }
 
