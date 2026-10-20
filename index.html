@@ -7,11 +7,12 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="90DayFit" />
+  <meta name="apple-mobile-web-app-title" content="fit90" />
+  <meta name="description" content="90-day transformation and anterior pelvic tilt correction tracker: full 7-day Cult gym split, hour-by-hour routine, no-cook pure-veg PG diet and a complete printable plan sheet." />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <title>90-Day Transformation & APT Tracker</title>
+  <title>90-Day Transformation &amp; APT Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -22,921 +23,402 @@
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    @keyframes pulseMove {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::after { content: " \25be"; opacity: .6; }
+    details[open] > summary::after { content: " \25b4"; }
+
+    /* ---- Full Plan sheet typography (also what printing uses) ---- */
+    .plan-sec { }
+    .plan-h2 { font-size: 15px; font-weight: 800; color: #fff; margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 1px solid #1e293b; }
+    .plan-h3 { font-size: 12.5px; font-weight: 700; color: #6ee7b7; margin: 12px 0 4px; }
+    .plan-h4 { font-size: 12px; font-weight: 700; color: #fff; margin: 0 0 3px; }
+    .plan-p { font-size: 11.5px; line-height: 1.65; color: #cbd5e1; margin: 0 0 7px; }
+    .plan-kv { font-size: 11.5px; line-height: 1.6; color: #cbd5e1; margin: 0 0 4px; }
+    .plan-kv b { color: #f1f5f9; }
+    .plan-dim { color: #94a3b8; }
+    .plan-apt { color: #fcd34d; }
+    .plan-apt b { color: #fbbf24; }
+    .plan-warn { font-size: 11.5px; line-height: 1.6; color: #fcd34d; background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.25); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+    .plan-ul { font-size: 11.5px; line-height: 1.65; color: #cbd5e1; margin: 0 0 8px; padding-left: 18px; }
+    .plan-ul li { margin-bottom: 3px; }
+    .plan-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+    .plan-card-active { border-color: rgba(16,185,129,.6); }
+    .plan-ex { background: rgba(30,41,59,.4); border-left: 2px solid #334155; border-radius: 0 8px 8px 0; padding: 8px 10px; margin-bottom: 7px; }
+    .plan-table { width: 100%; font-size: 10.5px; border-collapse: collapse; margin: 6px 0 12px; }
+    .plan-table th { text-align: left; color: #94a3b8; font-weight: 700; border-bottom: 1px solid #334155; padding: 4px 6px 4px 0; }
+    .plan-table td { color: #cbd5e1; border-bottom: 1px solid #1e293b; padding: 4px 6px 4px 0; vertical-align: top; line-height: 1.5; }
+
+    @media print {
+      @page { margin: 12mm; }
+      html, body { background: #fff !important; color: #000 !important; }
+      header, nav, #restTimer, #tutorialModal, .no-print { display: none !important; }
+      main { max-width: none !important; padding: 0 !important; }
+      section[id^="view-"] { display: none !important; }
+      #view-plan { display: block !important; }
+      #planTabs { display: none !important; }
+      .plan-h2 { color: #000; border-bottom: 1px solid #999; page-break-after: avoid; }
+      .plan-h3 { color: #111; page-break-after: avoid; }
+      .plan-h4 { color: #000; page-break-after: avoid; }
+      .plan-p, .plan-kv, .plan-ul { color: #222; }
+      .plan-kv b { color: #000; }
+      .plan-dim { color: #555; }
+      .plan-apt, .plan-apt b { color: #000; font-style: italic; }
+      .plan-warn { color: #000; background: #f4f4f4; border: 1px solid #bbb; }
+      .plan-card, .plan-ex { background: #fff; border: 1px solid #ccc; page-break-inside: avoid; }
+      .plan-table th, .plan-table td { color: #000; border-bottom: 1px solid #ccc; }
+      .plan-table { page-break-inside: avoid; }
+      #planPrintHeader { display: block !important; }
     }
-    @keyframes pullMove {
-      0%, 100% { transform: translateY(-8px); }
-      50% { transform: translateY(8px); }
-    }
-    @keyframes tiltPelvis {
-      0%, 100% { transform: rotate(-14deg); }
-      50% { transform: rotate(4deg); }
-    }
-    .anim-press { animation: pulseMove 2s infinite ease-in-out; }
-    .anim-pull { animation: pullMove 2.2s infinite ease-in-out; }
-    .anim-tilt { animation: tiltPelvis 2.5s infinite ease-in-out; transform-origin: center; }
   </style>
 </head>
-<body class="pb-24 select-none">
+<body class="pb-24">
 
-  <!-- TOP HEADER -->
-  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3">
-    <div class="max-w-md mx-auto">
-      <div class="flex items-center justify-between gap-2">
-        <div>
-          <span id="dayBadge" class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-            Day 1 of 92
-          </span>
-          <h1 class="text-lg font-extrabold tracking-tight text-white mt-0.5">Project Lean & APT Fix</h1>
+  <!-- HEADER -->
+  <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+    <div class="max-w-md mx-auto px-4 pt-3 pb-2.5">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <h1 class="text-base font-extrabold text-white leading-tight">90-Day Transformation</h1>
+          <p class="text-[11px] text-slate-400">
+            <span id="dayLabel">Day 1 of 92</span> &bull; <span id="phaseLabel">Week 1</span>
+          </p>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button id="installAppBtn" onclick="triggerInstall()" class="hidden bg-emerald-500 active:bg-emerald-400 text-slate-950 font-extrabold text-xs px-2.5 py-1.5 rounded-lg shadow">
-            📲 Install App
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="installAppBtn" onclick="triggerInstall()" class="hidden bg-emerald-500 active:bg-emerald-400 text-slate-950 font-extrabold text-[11px] px-2 py-1.5 rounded-lg">
+            Install
           </button>
-          <input type="date" id="datePicker" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500" />
+          <input type="date" id="datePicker" class="bg-slate-800 text-[11px] text-slate-200 border border-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-emerald-500" />
         </div>
       </div>
 
-      <div class="grid grid-cols-4 gap-2 mt-3 text-center">
+      <div class="flex items-center gap-1.5 mt-2.5">
+        <span class="text-[8px] text-slate-500 font-bold w-7 shrink-0">DAY</span>
+        <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div id="dayProgressBar" class="h-full bg-emerald-500 transition-all" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 mt-1">
+        <span class="text-[8px] text-slate-500 font-bold w-7 shrink-0">PROT</span>
+        <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div id="proteinBar" class="h-full bg-blue-500 transition-all" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-4 gap-1.5 mt-2 text-center">
         <div class="bg-slate-800/80 rounded-lg p-1.5 border border-slate-700/60">
-          <div class="text-[10px] text-slate-400">Daily Done</div>
-          <div id="statCompletion" class="text-sm font-bold text-emerald-400">0%</div>
+          <div class="text-[9px] text-slate-400">Day done</div>
+          <div id="statCompletion" class="text-xs font-bold text-emerald-400">0%</div>
         </div>
         <div class="bg-slate-800/80 rounded-lg p-1.5 border border-slate-700/60">
-          <div class="text-[10px] text-slate-400">Protein</div>
-          <div id="statProtein" class="text-sm font-bold text-blue-400">0g / 120g</div>
+          <div class="text-[9px] text-slate-400">Protein</div>
+          <div id="statProtein" class="text-xs font-bold text-blue-400">0 / 150g</div>
         </div>
         <div class="bg-slate-800/80 rounded-lg p-1.5 border border-slate-700/60">
-          <div class="text-[10px] text-slate-400">Water</div>
-          <div id="statWater" class="text-sm font-bold text-cyan-400">0.0 / 3.5L</div>
+          <div class="text-[9px] text-slate-400">Calories</div>
+          <div id="statKcal" class="text-xs font-bold text-amber-400">0 / 1950</div>
         </div>
         <div class="bg-slate-800/80 rounded-lg p-1.5 border border-slate-700/60">
-          <div class="text-[10px] text-slate-400">Day Cost</div>
-          <div id="statCost" class="text-sm font-bold text-amber-400">₹0</div>
+          <div class="text-[9px] text-slate-400">Water</div>
+          <div id="statWater" class="text-xs font-bold text-cyan-400">0.0 / 3.5L</div>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
   <main class="max-w-md mx-auto px-4 pt-4">
 
-    <!-- VIEW 1: WORKOUT & TUTORIALS -->
+    <!-- ============ VIEW 1: GYM ============ -->
     <section id="view-workout" class="space-y-4">
-      <div class="bg-gradient-to-r from-emerald-900/40 to-slate-900 border border-emerald-500/30 rounded-xl p-3.5">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Morning 05:00 - 07:00 AM</p>
-            <h2 class="text-base font-bold text-white">Cult Gym 6-Day Split & APT Fix</h2>
+      <div class="bg-gradient-to-br from-emerald-900/40 to-slate-900 border border-emerald-500/30 rounded-xl p-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">05:00 - 07:00 AM &bull; Cult Gym</p>
+            <h2 id="workoutDayTitle" class="text-base font-extrabold text-white">Day 1: Push</h2>
+            <p id="workoutDayFocus" class="text-[11px] text-slate-400"></p>
           </div>
-          <span id="workoutProgressLabel" class="text-xs font-bold bg-slate-800 px-2.5 py-1 rounded-full text-emerald-400 border border-slate-700">0/4 Done</span>
+          <span id="workoutProgressLabel" class="shrink-0 text-[11px] font-bold bg-slate-800 px-2 py-1 rounded-full text-emerald-400 border border-slate-700">0/0 sets</span>
         </div>
+        <p id="workoutSummary" class="text-[11px] text-slate-300 leading-relaxed mt-2"></p>
+        <p id="workoutPhaseNote" class="text-[11px] text-slate-300 leading-relaxed mt-2 bg-slate-800/60 border border-slate-700/60 rounded-lg px-2.5 py-2"></p>
         <div id="daySelector" class="flex gap-1.5 overflow-x-auto no-scrollbar mt-3 pb-1"></div>
       </div>
-      <div id="exerciseList" class="space-y-3"></div>
+      <div id="exerciseList" class="space-y-5"></div>
     </section>
 
-    <!-- VIEW 2: HOURLY SCHEDULE -->
+    <!-- ============ VIEW 2: HOURLY ============ -->
     <section id="view-schedule" class="space-y-3 hidden">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
-        <div>
-          <h2 class="text-base font-bold text-white">Hour-by-Hour Daily Routine</h2>
-          <p class="text-xs text-slate-400">Tap each block as you complete your day</p>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <h2 id="scheduleTitle" class="text-base font-extrabold text-white">Hour-by-Hour Gym Day</h2>
+          <p id="scheduleSub" class="text-[11px] text-slate-400"></p>
         </div>
-        <button onclick="addWater(0.25)" class="bg-cyan-500/20 active:bg-cyan-500/40 text-cyan-300 border border-cyan-500/40 text-xs font-bold px-3 py-2 rounded-lg">
-          +250ml Water
-        </button>
+        <div class="flex flex-col gap-1 shrink-0">
+          <button onclick="addWater(0.25)" class="bg-cyan-500/20 active:bg-cyan-500/40 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold px-2.5 py-1.5 rounded-lg">+250ml</button>
+          <button onclick="addWater(-0.25)" class="bg-slate-800 active:bg-slate-700 text-slate-400 border border-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-lg">undo</button>
+        </div>
       </div>
       <div id="scheduleList" class="space-y-2.5"></div>
     </section>
 
-    <!-- VIEW 3: DIET & PG MEAL ROTATION -->
+    <!-- ============ VIEW 3: DIET ============ -->
     <section id="view-diet" class="space-y-3 hidden">
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-base font-bold text-white">No-Cook Pure Veg PG Diet</h2>
-            <p class="text-xs text-slate-400">Switch between Options 1, 2, or 3 daily</p>
-          </div>
-          <div class="text-right">
-            <span class="text-[11px] text-slate-400 block">Est. Monthly</span>
-            <span id="monthlyBudgetDisplay" class="text-sm font-bold text-amber-400">₹9,000 / ₹10k</span>
-          </div>
-        </div>
+        <h2 class="text-base font-extrabold text-white">No-Cook Pure-Veg PG Diet</h2>
+        <p class="text-[11px] text-slate-400">6 meals &times; 6 options &bull; tap a number to switch option</p>
+        <p id="dietTargets" class="text-[11px] mt-2 bg-slate-800/60 border border-slate-700/60 rounded-lg px-2.5 py-2 text-slate-300"></p>
+        <p id="dietCost" class="text-[10px] text-amber-400 font-semibold mt-1.5"></p>
       </div>
+      <div id="dietStrategy" class="bg-slate-900 border border-slate-800 rounded-xl p-3.5"></div>
       <div id="dietList" class="space-y-3"></div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+        <h3 class="text-sm font-bold text-white mb-2">Supplements</h3>
+        <div id="supplementList" class="space-y-2"></div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+        <h3 class="text-sm font-bold text-white mb-2">Hydration Schedule</h3>
+        <div id="hydrationList" class="space-y-1.5"></div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+        <h3 class="text-sm font-bold text-white mb-2">Weekly Shopping List</h3>
+        <div id="groceryList" class="space-y-1.5"></div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+        <h3 class="text-sm font-bold text-white mb-2">When Life Gets In The Way</h3>
+        <div id="fallbackList" class="space-y-1.5"></div>
+      </div>
     </section>
 
-    <!-- VIEW 4: BODY METRICS -->
-    <section id="view-metrics" class="space-y-4 hidden">
+    <!-- ============ VIEW 4: APT ============ -->
+    <section id="view-apt" class="space-y-3 hidden">
+      <div class="bg-gradient-to-br from-purple-900/40 to-slate-900 border border-purple-500/30 rounded-xl p-3.5">
+        <p class="text-[10px] text-purple-400 font-bold uppercase tracking-wider">Anterior Pelvic Tilt</p>
+        <h2 class="text-base font-extrabold text-white">The Correction Program</h2>
+        <p id="aptWhat" class="text-[11px] text-slate-300 leading-relaxed mt-2"></p>
+      </div>
+
+      <div class="bg-slate-900 border border-emerald-500/30 rounded-xl p-3.5">
+        <h3 class="text-sm font-bold text-emerald-400 mb-1.5">If you only do six things</h3>
+        <ul id="aptNonNegotiables" class="space-y-1 text-[11px] text-slate-200 leading-relaxed"></ul>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+        <h3 class="text-sm font-bold text-white mb-1.5">Today's Habit Checklist</h3>
+        <div id="aptHabitList" class="space-y-1.5"></div>
+      </div>
+
+      <h3 class="text-sm font-extrabold text-white pt-1">Daily Routines</h3>
+      <div id="aptDailyList" class="space-y-3"></div>
+
+      <h3 class="text-sm font-extrabold text-white pt-1">The Four-Step Protocol</h3>
+      <div id="aptProtocol" class="space-y-3"></div>
+
+      <h3 class="text-sm font-extrabold text-white pt-1">Self-Assessment</h3>
+      <div id="aptTests" class="space-y-3"></div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+        <h3 class="text-sm font-bold text-white mb-2">Logged Test Results</h3>
+        <div id="aptTestHistory" class="space-y-1.5"></div>
+      </div>
+
+      <h3 class="text-sm font-extrabold text-white pt-1">13-Week Progression</h3>
+      <div id="aptProgression" class="space-y-3"></div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+        <h3 class="text-sm font-bold text-white mb-1.5">Why You Have It</h3>
+        <div id="aptWhyYou" class="space-y-2"></div>
+        <h3 class="text-sm font-bold text-white mt-3 mb-1.5">What It Costs You</h3>
+        <ul id="aptConsequences" class="space-y-1 text-[11px] text-slate-300 leading-relaxed"></ul>
+        <h3 class="text-sm font-bold text-white mt-3 mb-1.5">What To Expect, When</h3>
+        <div id="aptTimeline" class="space-y-1.5"></div>
+      </div>
+    </section>
+
+    <!-- ============ VIEW 5: STATS ============ -->
+    <section id="view-metrics" class="space-y-3 hidden">
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-        <h2 class="text-base font-bold text-white mb-1">Log Today's Body Metrics</h2>
-        <p class="text-xs text-slate-400 mb-3">Goal: 80 kg (25% BF) → ~68.2 kg (12% BF) by Jan 20</p>
-        <div class="grid grid-cols-2 gap-2.5">
+        <h2 class="text-base font-extrabold text-white mb-1">Log Today's Check-In</h2>
+        <p id="metricsTarget" class="text-[11px] text-slate-400 mb-3"></p>
+        <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="text-[11px] text-slate-400 block mb-1">Weight (kg)</label>
-            <input id="inputWeight" type="number" step="0.1" placeholder="80.0" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+            <label class="text-[10px] text-slate-400 block mb-1">Weight (kg)</label>
+            <input id="inputWeight" type="number" step="0.1" inputmode="decimal" placeholder="80.0" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-sm text-white" />
           </div>
           <div>
-            <label class="text-[11px] text-slate-400 block mb-1">Body Fat (%)</label>
-            <input id="inputBF" type="number" step="0.1" placeholder="24.0" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+            <label class="text-[10px] text-slate-400 block mb-1">Body fat (%)</label>
+            <input id="inputBF" type="number" step="0.1" inputmode="decimal" placeholder="25.0" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-sm text-white" />
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Waist (cm)</label>
+            <input id="inputWaist" type="number" step="0.5" inputmode="decimal" placeholder="92" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-sm text-white" />
           </div>
         </div>
-        <button onclick="saveMetrics()" class="w-full mt-3 bg-emerald-600 active:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-lg">
-          Save Today's Check-In
-        </button>
+        <button onclick="saveMetrics()" class="w-full mt-3 bg-emerald-600 active:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-lg">Save Check-In</button>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-        <h3 class="text-sm font-bold text-white mb-2.5">Muscle Memory & Body Composition History</h3>
+        <h3 class="text-sm font-bold text-white mb-2">Fortnightly Checkpoints</h3>
+        <div id="checkpointList" class="space-y-1.5"></div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+        <h3 class="text-sm font-bold text-white mb-2">Body Composition History</h3>
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left">
+          <table class="w-full text-[11px] text-left">
             <thead class="text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-1.5">Phase</th>
-                <th class="py-1.5">Weight</th>
-                <th class="py-1.5">Muscle</th>
-                <th class="py-1.5">Body Fat</th>
-                <th class="py-1.5">BMI</th>
-              </tr>
+              <tr><th class="py-1.5">Phase</th><th class="py-1.5">Weight</th><th class="py-1.5">Muscle</th><th class="py-1.5">BF</th><th class="py-1.5">BMI</th></tr>
             </thead>
             <tbody class="divide-y divide-slate-800/70">
-              <tr>
-                <td class="py-2 font-semibold text-emerald-400">Apr 2025 (Lean)</td>
-                <td>64.2 kg</td>
-                <td>30.7 kg</td>
-                <td>13.1%</td>
-                <td>21.5</td>
-              </tr>
-              <tr>
-                <td class="py-2 font-semibold text-blue-400">Aug 30, 2025</td>
-                <td>72.2 kg</td>
-                <td>32.5 kg</td>
-                <td>18.2%</td>
-                <td>24.2</td>
-              </tr>
-              <tr>
-                <td class="py-2 font-semibold text-amber-400">Oct 20, 2026 (Start)</td>
-                <td>80.0 kg</td>
-                <td>~32.0 kg</td>
-                <td>23-27%</td>
-                <td>26.0</td>
-              </tr>
-              <tr>
-                <td class="py-2 font-semibold text-purple-400">Jan 20, 2027 (Goal)</td>
-                <td>68.2 kg</td>
-                <td>33.0+ kg</td>
-                <td>12.0%</td>
-                <td>22.2</td>
-              </tr>
+              <tr><td class="py-2 font-semibold text-emerald-400">Apr 2025 (lean)</td><td>64.2 kg</td><td>30.7 kg</td><td>13.1%</td><td>21.5</td></tr>
+              <tr><td class="py-2 font-semibold text-blue-400">Aug 30, 2025</td><td>72.2 kg</td><td>32.5 kg</td><td>18.2%</td><td>24.2</td></tr>
+              <tr><td class="py-2 font-semibold text-amber-400">Oct 20, 2026 (start)</td><td>80.0 kg</td><td>~32.0 kg</td><td>23-27%</td><td>26.0</td></tr>
+              <tr><td class="py-2 font-semibold text-purple-400">Jan 20, 2027 (goal)</td><td>68.2 kg</td><td>33.0+ kg</td><td>12.0%</td><td>22.2</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-        <h3 class="text-sm font-bold text-white mb-2">Recent Logged Check-Ins</h3>
-        <div id="weightHistoryList" class="space-y-1.5 text-xs text-slate-300"></div>
+        <h3 class="text-sm font-bold text-white mb-2">Your Logged Check-Ins</h3>
+        <div id="weightHistoryList" class="space-y-1.5"></div>
       </div>
+
+      <div class="bg-slate-900 border border-amber-500/30 rounded-xl p-4">
+        <h3 class="text-sm font-bold text-amber-400 mb-2">When The Scale Stops Moving</h3>
+        <ul id="plateauRules" class="space-y-1.5 text-[11px] text-slate-200 leading-relaxed"></ul>
+      </div>
+    </section>
+
+    <!-- ============ VIEW 6: FULL PLAN ============ -->
+    <section id="view-plan" class="space-y-3 hidden">
+      <div id="planPrintHeader" class="hidden">
+        <h1 style="font-size:20px;font-weight:800;margin-bottom:2px;">90-Day Transformation &amp; APT Correction — Full Plan</h1>
+        <p style="font-size:11px;">Oct 20, 2026 &rarr; Jan 20, 2027 &bull; 80.0 kg / 25% BF &rarr; 68.2 kg / 12% BF</p>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 no-print">
+        <h2 class="text-base font-extrabold text-white">The Complete Plan Sheet</h2>
+        <p class="text-[11px] text-slate-400">Every hour, every exercise, every machine, every meal option &mdash; nothing summarised away.</p>
+        <button onclick="printPlan()" class="w-full mt-2.5 bg-slate-800 active:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs py-2.5 rounded-lg">
+          Print / Save the whole plan as PDF
+        </button>
+      </div>
+
+      <div id="planTabs" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        <button data-plan-tab="overview"    onclick="setPlanSection('overview')">Overview</button>
+        <button data-plan-tab="routine"     onclick="setPlanSection('routine')">Daily Routine</button>
+        <button data-plan-tab="training"    onclick="setPlanSection('training')">All 7 Workouts</button>
+        <button data-plan-tab="diet"        onclick="setPlanSection('diet')">Diet &amp; Supplements</button>
+        <button data-plan-tab="apt"         onclick="setPlanSection('apt')">APT Program</button>
+        <button data-plan-tab="checkpoints" onclick="setPlanSection('checkpoints')">Checkpoints</button>
+        <button data-plan-tab="all"         onclick="setPlanSection('all')">Everything</button>
+      </div>
+
+      <div id="planContent" class="bg-slate-900 border border-slate-800 rounded-xl p-3.5"></div>
     </section>
 
   </main>
 
+  <!-- REST TIMER -->
+  <div id="restTimer" class="hidden fixed bottom-20 inset-x-0 z-40 px-4">
+    <div class="max-w-md mx-auto bg-slate-800 border border-emerald-500/50 rounded-xl px-3.5 py-2.5 flex items-center justify-between shadow-lg">
+      <div class="min-w-0">
+        <p class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Rest</p>
+        <p id="restTimerLabel" class="text-[11px] text-slate-300 truncate"></p>
+      </div>
+      <div class="flex items-center gap-2.5 shrink-0">
+        <span id="restTimerText" class="text-lg font-extrabold text-emerald-400 tabular-nums">0:00</span>
+        <button onclick="stopRest()" class="text-[11px] font-bold text-slate-400 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1">skip</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TUTORIAL MODAL -->
-  <div id="tutorialModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-slate-900 border-t sm:border border-slate-700 w-full max-w-md rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto p-4 space-y-3.5">
-      <div class="flex items-start justify-between border-b border-slate-800 pb-2.5">
-        <div>
-          <span id="modalMachine" class="text-[11px] font-bold uppercase px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">Machine</span>
-          <h3 id="modalTitle" class="text-lg font-extrabold text-white mt-1">Exercise Name</h3>
+  <div id="tutorialModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border-t sm:border border-slate-700 w-full max-w-md rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto p-4 space-y-3">
+      <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-2.5">
+        <div class="min-w-0">
+          <span id="modalMachine" class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400">Machine</span>
+          <h3 id="modalTitle" class="text-base font-extrabold text-white mt-1 leading-tight">Exercise</h3>
+          <p id="modalPrescription" class="text-[11px] text-slate-400"></p>
         </div>
-        <button onclick="closeModal()" class="bg-slate-800 text-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold">Close ✕</button>
+        <button onclick="closeModal()" class="shrink-0 bg-slate-800 text-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold">Close</button>
       </div>
 
-      <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center">
-        <div id="modalSvgContainer" class="w-full h-40 flex items-center justify-center"></div>
-        <p id="modalAnimCaption" class="text-[11px] text-slate-400 mt-1 text-center"></p>
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-1">
+        <div id="modalSvgContainer" class="w-full h-52"></div>
       </div>
 
-      <div class="space-y-2.5 text-xs">
+      <button id="wrongFormBtn" onclick="toggleWrongForm()" class="w-full py-2.5 rounded-xl text-xs font-bold border bg-slate-800 border-slate-700 text-slate-300">
+        Compare with wrong form
+      </button>
+      <div id="modalWrongWrap" class="hidden bg-red-500/10 border border-red-500/30 rounded-xl p-3">
+        <div class="font-bold text-red-400 uppercase tracking-wider text-[10px] mb-1">The fault on the left</div>
+        <p id="modalWrongNote" class="text-[11px] text-red-100 leading-relaxed"></p>
+      </div>
+
+      <div class="space-y-2.5">
         <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3">
-          <div class="font-bold text-emerald-400 uppercase tracking-wider text-[10px] mb-1">1. Cult Machine Setup</div>
-          <p id="modalSetup" class="text-slate-200 leading-relaxed"></p>
+          <div class="font-bold text-emerald-400 uppercase tracking-wider text-[10px] mb-1">1. Machine setup</div>
+          <p id="modalSetup" class="text-[11px] text-slate-200 leading-relaxed"></p>
         </div>
         <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3">
-          <div class="font-bold text-blue-400 uppercase tracking-wider text-[10px] mb-1">2. Step-by-Step Execution</div>
-          <p id="modalExecution" class="text-slate-200 leading-relaxed"></p>
+          <div class="font-bold text-blue-400 uppercase tracking-wider text-[10px] mb-1">2. Step-by-step execution</div>
+          <p id="modalExecution" class="text-[11px] text-slate-200 leading-relaxed"></p>
         </div>
         <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
-          <div class="font-bold text-amber-400 uppercase tracking-wider text-[10px] mb-1">3. APT Posture Protection Cue</div>
-          <p id="modalAptCue" class="text-amber-100 leading-relaxed"></p>
+          <div class="font-bold text-amber-400 uppercase tracking-wider text-[10px] mb-1">3. APT posture cue</div>
+          <p id="modalAptCue" class="text-[11px] text-amber-100 leading-relaxed"></p>
+        </div>
+        <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-3">
+          <div class="font-bold text-red-400 uppercase tracking-wider text-[10px] mb-1">4. Most common mistake</div>
+          <p id="modalMistake" class="text-[11px] text-slate-200 leading-relaxed"></p>
+        </div>
+        <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3">
+          <div class="font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">5. If the machine is taken</div>
+          <p id="modalSubstitute" class="text-[11px] text-slate-200 leading-relaxed"></p>
         </div>
       </div>
 
       <a id="modalVideoBtn" href="#" target="_blank" rel="noopener noreferrer"
          class="block w-full text-center bg-red-600 active:bg-red-500 text-white font-bold text-xs py-3 rounded-xl shadow-lg">
-        ▶ Watch Full Video Demonstration (YouTube)
+        Watch video demonstrations (YouTube)
       </a>
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION -->
+  <!-- BOTTOM NAV -->
   <nav class="fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800">
-    <div class="max-w-md mx-auto grid grid-cols-4 py-2">
-      <button onclick="switchTab('workout')" id="nav-workout" class="flex flex-col items-center text-emerald-400 font-bold text-xs py-1">
-        <span>🏋️‍♂️</span>
-        <span class="mt-0.5">Gym & Tutorials</span>
+    <div class="max-w-md mx-auto grid grid-cols-6 py-1.5">
+      <button onclick="switchTab('workout')" id="nav-workout" class="flex flex-col items-center text-[9px] py-1 text-emerald-400 font-bold">
+        <span class="text-base">&#127947;</span><span class="mt-0.5">Gym</span>
       </button>
-      <button onclick="switchTab('schedule')" id="nav-schedule" class="flex flex-col items-center text-slate-400 font-medium text-xs py-1">
-        <span>⏰</span>
-        <span class="mt-0.5">Hourly Plan</span>
+      <button onclick="switchTab('schedule')" id="nav-schedule" class="flex flex-col items-center text-[9px] py-1 text-slate-400 font-medium">
+        <span class="text-base">&#9200;</span><span class="mt-0.5">Hourly</span>
       </button>
-      <button onclick="switchTab('diet')" id="nav-diet" class="flex flex-col items-center text-slate-400 font-medium text-xs py-1">
-        <span>🥗</span>
-        <span class="mt-0.5">Veg Diet (3x)</span>
+      <button onclick="switchTab('diet')" id="nav-diet" class="flex flex-col items-center text-[9px] py-1 text-slate-400 font-medium">
+        <span class="text-base">&#129367;</span><span class="mt-0.5">Diet</span>
       </button>
-      <button onclick="switchTab('metrics')" id="nav-metrics" class="flex flex-col items-center text-slate-400 font-medium text-xs py-1">
-        <span>📉</span>
-        <span class="mt-0.5">Body Stats</span>
+      <button onclick="switchTab('apt')" id="nav-apt" class="flex flex-col items-center text-[9px] py-1 text-slate-400 font-medium">
+        <span class="text-base">&#129460;</span><span class="mt-0.5">APT Fix</span>
+      </button>
+      <button onclick="switchTab('metrics')" id="nav-metrics" class="flex flex-col items-center text-[9px] py-1 text-slate-400 font-medium">
+        <span class="text-base">&#128201;</span><span class="mt-0.5">Stats</span>
+      </button>
+      <button onclick="switchTab('plan')" id="nav-plan" class="flex flex-col items-center text-[9px] py-1 text-slate-400 font-medium">
+        <span class="text-base">&#128203;</span><span class="mt-0.5">Plan</span>
       </button>
     </div>
   </nav>
 
-  <script>
-    let deferredPrompt = null;
-
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("sw.js").catch(() => {});
-      });
-    }
-
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById("installAppBtn").classList.remove("hidden");
-    });
-
-    async function triggerInstall() {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        document.getElementById("installAppBtn").classList.add("hidden");
-      }
-      deferredPrompt = null;
-    }
-
-    window.addEventListener("appinstalled", () => {
-      document.getElementById("installAppBtn").classList.add("hidden");
-    });
-
-    const SCHEDULE_DATA = [
-      { id: "s1", time: "5:00 AM - 7:00 AM", title: "Cult Gym Workout", detail: "Push / Pull / Legs / Core & APT Correction (2 Hours)" },
-      { id: "s2", time: "7:00 AM - 8:00 AM", title: "Morning Routine & Breakfast", detail: "Shower, get ready, high-protein no-cook breakfast" },
-      { id: "s3", time: "8:00 AM - 9:00 AM", title: "Commute / Morning Focus", detail: "Travel or sprint planning; stand/walk when possible" },
-      { id: "s4", time: "9:00 AM - 1:00 PM", title: "Deep Software Engineering Work", detail: "Stand every 45 mins for 60s glute squeeze + 11 AM snack" },
-      { id: "s5", time: "1:00 PM - 2:00 PM", title: "Lunch Break", detail: "PG meal + raw paneer / soaked soya chunks / Greek yogurt" },
-      { id: "s6", time: "2:00 PM - 5:00 PM", title: "Afternoon Engineering Sessions", detail: "Maintain neutral pelvis on chair; hydrate consistently" },
-      { id: "s7", time: "5:00 PM - 6:00 PM", title: "Evening Snack", detail: "Roasted chana / paneer sandwich / black coffee + almonds" },
-      { id: "s8", time: "6:00 PM - 8:00 PM", title: "Brisk Walk / Personal Projects", detail: "Hit 8,000-10,000 steps + personal upskilling" },
-      { id: "s9", time: "8:00 PM - 9:00 PM", title: "Light Dinner", detail: "Low-oil PG meal + whey shake or sprout salad" },
-      { id: "s10", time: "9:00 PM - 10:00 PM", title: "Wind Down & 10-Min Hip Flexor Stretch", detail: "Half-kneeling hip flexor stretch before bed, prep oats/sprouts" },
-      { id: "s11", time: "10:00 PM - 5:00 AM", title: "7 Hours Deep Recovery Sleep", detail: "Essential for fat loss and muscle memory restoration" }
-    ];
-
-    const DIET_DATA = [
-      {
-        id: "m1", meal: "Breakfast", time: "07:30 AM", prep: "Hot Water / Assemble", cost: 80,
-        options: [
-          { name: "Option 1: Hot Water Oats + 1 Scoop Whey", desc: "Instant Oats (60g) softened in hot water + 1 Scoop Whey stirred in warm", protein: 30 },
-          { name: "Option 2: PB & Banana Whole Wheat Sandwich", desc: "2 slices Whole Wheat Bread + 2 tbsp Natural Peanut Butter + 1 Banana", protein: 15 },
-          { name: "Option 3: Greek Yogurt + Nuts + Apple", desc: "200g Greek Yogurt (Epigamia/Amul) + Mixed Nuts + 1 Diced Apple", protein: 20 }
-        ]
-      },
-      {
-        id: "m2", meal: "Mid-Morning", time: "11:00 AM", prep: "Zero Prep / Soak", cost: 40,
-        options: [
-          { name: "Option 1: Roasted Chana + Peanuts", desc: "50g Roasted Chana + 20g Roasted Peanuts (crunchy desk snack)", protein: 15 },
-          { name: "Option 2: Fresh Sprout Salad", desc: "Pre-soaked Moong/Chana Sprouts + Diced Cucumber, Tomato & Lemon", protein: 12 },
-          { name: "Option 3: 1 Scoop Whey in Room Water", desc: "Quick shaker bottle protein boost between coding blocks", protein: 25 }
-        ]
-      },
-      {
-        id: "m3", meal: "Lunch", time: "01:00 PM", prep: "Hot Water / Assemble", cost: 50,
-        options: [
-          { name: "Option 1: PG Meal + 50g Raw Paneer", desc: "PG Dal/Sabzi (skip oily gravy) + 50g cubed fresh raw paneer with black salt", protein: 20 },
-          { name: "Option 2: PG Meal + Hot-Water Soya Chunks", desc: "50g Soya Chunks soaked in boiling water 10 mins, squeezed, tossed with chaat masala", protein: 30 },
-          { name: "Option 3: PG Meal + 1 Bowl Curd/Greek Yogurt", desc: "Controlled PG rotis/rice + thick curd/yogurt bowl for gut health & protein", protein: 15 }
-        ]
-      },
-      {
-        id: "m4", meal: "Evening Fuel", time: "05:00 PM", prep: "Hot Water / Assemble", cost: 40,
-        options: [
-          { name: "Option 1: Black Coffee + 1 Banana + 10 Almonds", desc: "Hot water black coffee + banana + 10 soaked/raw almonds", protein: 5 },
-          { name: "Option 2: Brown Bread + 50g Raw Paneer Slice", desc: "2 slices brown bread with seasoned raw paneer slices", protein: 15 },
-          { name: "Option 3: Roasted Chana (50g) + Green Tea", desc: "Hot water green tea + 50g spiced roasted chana", protein: 10 }
-        ]
-      },
-      {
-        id: "m5", meal: "Dinner", time: "08:00 PM", prep: "Assemble", cost: 60,
-        options: [
-          { name: "Option 1: Light PG Meal + 1 Scoop Whey", desc: "Half portion PG carbs + salad + 1 scoop whey in water", protein: 25 },
-          { name: "Option 2: PG Meal + Sprout & Tomato Salad", desc: "Light PG dal/roti + large bowl of sprouted moong & tomato salad", protein: 10 },
-          { name: "Option 3: PG Meal + 50g Raw Paneer", desc: "Light PG dinner + 50g raw paneer cubes with cucumber", protein: 15 }
-        ]
-      },
-      {
-        id: "m6", meal: "Before Bed", time: "10:00 PM", prep: "Hot Water / Raw", cost: 30,
-        options: [
-          { name: "Option 1: 1/2 Scoop Whey in Water", desc: "Light overnight muscle recovery protein without heavy calories", protein: 12 },
-          { name: "Option 2: Handful of Almonds & Walnuts", desc: "Healthy fats & magnesium for deep sleep and hormone support", protein: 8 },
-          { name: "Option 3: Green Tea + Roasted Pumpkin Seeds", desc: "2 tbsp pumpkin seeds (zinc + magnesium) + warm herbal tea", protein: 10 }
-        ]
-      }
-    ];
-
-    const WORKOUT_DAYS = [
-      {
-        day: 1, name: "Day 1: Push", focus: "Chest, Shoulders & Triceps",
-        exercises: [
-          {
-            id: "d1e1", name: "Incline Chest Press", machine: "Cult Fuel Series Chest Press", sets: 3, reps: "10-12 Reps", type: "press",
-            setup: "Adjust the seat height so the handles align with your upper collarbone. Retract your shoulder blades firmly against the back pad.",
-            exec: "Drive the handles forward and upward to full extension without locking out elbows. Take 3 full seconds to lower the weight back down.",
-            apt: "Keep your lower back and ribs pressed flat into the pad. Never arch your lumbar spine off the seat to push heavier weight.",
-            video: "https://www.youtube.com/results?search_query=machine+incline+chest+press+proper+form"
-          },
-          {
-            id: "d1e2", name: "Flat Dumbbell Press", machine: "Flat Bench + Dumbbells", sets: 3, reps: "10-12 Reps", type: "press",
-            setup: "Lie on a flat bench with feet planted firmly on the floor. Hold dumbbells above chest with elbows angled 45 degrees from your torso.",
-            exec: "Lower the dumbbells slowly until level with your chest, feeling a deep stretch across the pecs. Press back up and squeeze.",
-            apt: "Exhale and pull your bottom ribs down toward your hips so your lower back stays neutral on the bench.",
-            video: "https://www.youtube.com/results?search_query=flat+dumbbell+bench+press+form"
-          },
-          {
-            id: "d1e3", name: "Shoulder Press", machine: "Cult Shoulder Press Machine", sets: 3, reps: "10-12 Reps", type: "press",
-            setup: "Adjust the seat so the handles sit at ear or jawline height. Grip handles with wrists stacked vertically above your elbows.",
-            exec: "Press straight overhead until arms are almost fully extended. Lower slowly back to chin level under strict control.",
-            apt: "Overhead pressing is the #1 trigger for Anterior Pelvic Tilt. Squeeze your glutes on the seat and glue your lower spine to the backrest.",
-            video: "https://www.youtube.com/results?search_query=seated+machine+shoulder+press+form"
-          },
-          {
-            id: "d1e4", name: "Tricep Pushdown", machine: "Cable Crossover Machine (Rope)", sets: 3, reps: "12-15 Reps", type: "pull",
-            setup: "Attach a rope handle to the top pulley. Stand 1 step back with feet shoulder-width apart and knees slightly unlocked.",
-            exec: "Pin your elbows to your ribs. Push the rope down until elbows lock out and pull the rope ends apart at the bottom for 1 second.",
-            apt: "Stand tall with your tailbone tucked slightly under. Do not stick your butt backward into an arched lower-back posture.",
-            video: "https://www.youtube.com/results?search_query=rope+tricep+pushdown+proper+form"
-          }
-        ]
-      },
-      {
-        day: 2, name: "Day 2: Pull", focus: "Back Width, Thickness, Rear Delts & Biceps",
-        exercises: [
-          {
-            id: "d2e1", name: "Lat Pulldown", machine: "Cult Lat Pulldown Machine", sets: 3, reps: "10-12 Reps", type: "pull",
-            setup: "Lock the thigh pad snugly over your quads. Grip the wide bar slightly wider than shoulder-width with an overhand grip.",
-            exec: "Pull your shoulders down away from your ears first, then drive your elbows down toward your hips until the bar touches your upper chest.",
-            apt: "Avoid leaning far back and hyperextending your lower spine. Keep your core braced and ribs tucked down.",
-            video: "https://www.youtube.com/results?search_query=lat+pulldown+proper+form"
-          },
-          {
-            id: "d2e2", name: "Seated Cable Row", machine: "Cult Seated Row Machine", sets: 3, reps: "10-12 Reps", type: "pull",
-            setup: "Place feet on the footplates with knees slightly bent. Sit tall with chest up and grab the V-handle.",
-            exec: "Pull the handle into your lower stomach while squeezing your shoulder blades together hard for 1 second. Extend arms slowly.",
-            apt: "Keep your pelvis upright on the seat and brace your abs like someone is about to tap your stomach.",
-            video: "https://www.youtube.com/results?search_query=seated+cable+row+proper+form"
-          },
-          {
-            id: "d2e3", name: "Face Pulls", machine: "Cable Machine (Eye-Level Rope)", sets: 3, reps: "15 Reps", type: "pull",
-            setup: "Set pulley to eye level with a rope attachment. Grab the rope with thumbs pointing backward.",
-            exec: "Pull the center of the rope toward your forehead while rotating your wrists backward into a double-bicep pose.",
-            apt: "Use a staggered stance, squeeze your glutes, and keep your ribcage stacked directly over your pelvis.",
-            video: "https://www.youtube.com/results?search_query=cable+face+pulls+form"
-          },
-          {
-            id: "d2e4", name: "Bicep Curls", machine: "Dumbbells / Preacher Machine", sets: 3, reps: "12-15 Reps", type: "pull",
-            setup: "Stand tall holding dumbbells at your sides with palms facing forward, or sit at the Cult Preacher Curl pad.",
-            exec: "Curl the weights up through a full range of motion, squeeze the biceps hard at the top, and lower for 3 full seconds.",
-            apt: "If standing, squeeze your glutes hard so you never lean backward with your lower back to heave the weight up.",
-            video: "https://www.youtube.com/results?search_query=dumbbell+bicep+curl+strict+form"
-          }
-        ]
-      },
-      {
-        day: 3, name: "Day 3: Legs", focus: "Glute Activation, Hamstrings & Quads",
-        exercises: [
-          {
-            id: "d3e1", name: "Leg Press (High Foot Placement)", machine: "Cult Leg Press Machine", sets: 3, reps: "10-12 Reps", type: "press",
-            setup: "Sit firmly against the backrest. Place your feet shoulder-width apart on the UPPER half of the platform to bias glutes and hamstrings.",
-            exec: "Disengage safety bars, lower the sled slowly until knees reach 90 degrees, and drive through your heels to press back up.",
-            apt: "Do not lower the sled so deep that your tailbone curls off the seat pad. Keep your sacrum glued to the pad.",
-            video: "https://www.youtube.com/results?search_query=leg+press+high+foot+placement+glutes"
-          },
-          {
-            id: "d3e2", name: "Leg Extensions", machine: "Cult Leg Extension Machine", sets: 3, reps: "12-15 Reps", type: "press",
-            setup: "Adjust the backrest so the back of your knees sit flush against the seat edge, with the ankle pad resting just above your feet.",
-            exec: "Grip the side handles, extend your legs fully until straight, hold the quad squeeze for 1 second, and lower under control.",
-            apt: "Pull yourself down into the seat using the side handles so your pelvis stays neutral.",
-            video: "https://www.youtube.com/results?search_query=leg+extension+machine+proper+form"
-          },
-          {
-            id: "d3e3", name: "Glute Bridges", machine: "Floor Mat (APT Correction)", sets: 4, reps: "15-20 Reps", type: "tilt",
-            setup: "Lie on your back on a mat with knees bent and heels about 6 inches from your glutes.",
-            exec: "Flatten your lower back into the mat first, then drive through your heels to lift hips until knees, hips, and shoulders form a straight line. Hold 2s.",
-            apt: "Never push from your lower back! The lift must come 100% from squeezing your glutes while keeping your ribs down.",
-            video: "https://www.youtube.com/results?search_query=glute+bridge+for+anterior+pelvic+tilt"
-          },
-          {
-            id: "d3e4", name: "Lying Hamstring Curls", machine: "Cult Lying Leg Curl Machine", sets: 3, reps: "12-15 Reps", type: "pull",
-            setup: "Lie face down on the pad with kneecaps just clear of the bench edge and the roller pad resting on your lower calves.",
-            exec: "Curl the pad up toward your glutes, pause 1 second at peak contraction, and lower slowly over 3 seconds.",
-            apt: "CRITICAL FOR APT: Press your hips/pubic bone down into the pad before every rep. Do not let your butt rise up as you curl.",
-            video: "https://www.youtube.com/results?search_query=lying+leg+curl+proper+form"
-          }
-        ]
-      },
-      {
-        day: 4, name: "Day 4: Core & APT", focus: "Anterior Pelvic Tilt Correction & Core Bracing",
-        exercises: [
-          {
-            id: "d4e1", name: "RKC Plank", machine: "Floor Mat (APT Correction)", sets: 3, reps: "60 Sec Hold", type: "tilt",
-            setup: "Get into a forearm plank with elbows directly beneath your shoulders and feet hip-width apart.",
-            exec: "Tuck your tailbone aggressively under (posterior tilt), squeeze your glutes and quads at 100% force, and pull your elbows toward your toes.",
-            apt: "This directly rewires your resting posture. Never let your belly sag toward the mat.",
-            video: "https://www.youtube.com/results?search_query=rkc+plank+proper+form"
-          },
-          {
-            id: "d4e2", name: "Deadbug", machine: "Floor Mat (APT Correction)", sets: 3, reps: "12 Reps / Side", type: "tilt",
-            setup: "Lie on your back with arms reaching straight to the ceiling and knees bent at 90 degrees over your hips.",
-            exec: "Crush your lower back flat into the floor. Slowly extend your right arm behind your head and left leg straight out simultaneously, then switch.",
-            apt: "If your lower back lifts even 1 cm off the mat, exhale harder and reduce leg extension range.",
-            video: "https://www.youtube.com/results?search_query=deadbug+exercise+anterior+pelvic+tilt"
-          },
-          {
-            id: "d4e3", name: "Bird Dog", machine: "Floor Mat", sets: 3, reps: "10 Reps / Side", type: "tilt",
-            setup: "Kneel on all fours with hands directly under shoulders and knees directly under hips.",
-            exec: "Brace your core and extend your right arm forward and left leg straight back until parallel with the floor. Hold 2 seconds and return.",
-            apt: "Do not lift your leg higher than hip height—lifting too high causes your lower back to arch into APT.",
-            video: "https://www.youtube.com/results?search_query=bird+dog+exercise+proper+form"
-          },
-          {
-            id: "d4e4", name: "Supine Pelvic Tilts", machine: "Floor Mat (APT Correction)", sets: 3, reps: "15 Reps (3s Hold)", type: "tilt",
-            setup: "Lie on your back on a mat with knees bent and feet flat on the floor.",
-            exec: "Exhale, tighten your lower abs and glutes, and roll your pelvis backward so your lower back presses completely flat into the mat. Hold 3s.",
-            apt: "Memorize how this pelvic position feels—replicate 30% of this tuck whenever you stand or walk.",
-            video: "https://www.youtube.com/results?search_query=supine+pelvic+tilt+exercise"
-          }
-        ]
-      },
-      {
-        day: 5, name: "Day 5: Upper Body", focus: "Calisthenics Return & Hypertrophy",
-        exercises: [
-          {
-            id: "d5e1", name: "Chest Fly", machine: "Cult Pec Deck Machine", sets: 3, reps: "12-15 Reps", type: "press",
-            setup: "Adjust seat so handles are at mid-chest height. Sit tall with shoulder blades pinned back against the pad.",
-            exec: "Bring handles together in a smooth wide arc as if hugging a barrel, squeeze your inner chest for 1 second, and return slowly.",
-            apt: "Keep your ribs down and lower back flat against the backrest throughout the set.",
-            video: "https://www.youtube.com/results?search_query=pec+deck+machine+chest+fly+form"
-          },
-          {
-            id: "d5e2", name: "Assisted Pull-ups", machine: "Cult Assisted Pull-up Machine", sets: 3, reps: "8-10 Reps", type: "pull",
-            setup: "Select counterweight (15-25 kg assistance at 80 kg bodyweight) and kneel securely on the assistance pad.",
-            exec: "Hang with arms fully extended, pull your shoulder blades down, and drive elbows to your ribs until your chin clears the bar. Lower over 3s.",
-            apt: "Keep your abs braced in a slight hollow-body position rather than arching your lower back.",
-            video: "https://www.youtube.com/results?search_query=assisted+pull+up+machine+proper+form"
-          },
-          {
-            id: "d5e3", name: "Dumbbell Shoulder Press", machine: "Seated 85° Bench + Dumbbells", sets: 3, reps: "10-12 Reps", type: "press",
-            setup: "Set an adjustable bench to nearly vertical (85 degrees). Sit with feet planted and hold dumbbells at shoulder level.",
-            exec: "Keep elbows angled 30 degrees forward (in the scapular plane) and press the dumbbells overhead.",
-            apt: "Press your lower back into the bench pad before initiating every rep.",
-            video: "https://www.youtube.com/results?search_query=seated+dumbbell+shoulder+press+form"
-          },
-          {
-            id: "d5e4", name: "Tricep Overhead Extension", machine: "Cable Rope / Dumbbell", sets: 3, reps: "12-15 Reps", type: "press",
-            setup: "Attach rope to mid/low pulley, face away from the machine in a staggered stance with elbows pointed forward/up alongside your ears.",
-            exec: "Extend your forearms forward and overhead until straight, stretching the long head of the triceps on the way back.",
-            apt: "Tuck your ribs down hard so the overhead stretch comes from your triceps, not from arching your lower spine.",
-            video: "https://www.youtube.com/results?search_query=overhead+cable+tricep+extension+rope+form"
-          }
-        ]
-      },
-      {
-        day: 6, name: "Day 6: Legs & APT", focus: "Posterior Chain & Hip Flexor Lengthening",
-        exercises: [
-          {
-            id: "d6e1", name: "Goblet Squats", machine: "Heavy Dumbbell / Kettlebell", sets: 3, reps: "10-12 Reps", type: "press",
-            setup: "Hold a dumbbell vertically against your chest like a goblet with elbows pointing down. Stand with feet shoulder-width apart.",
-            exec: "Sit straight down between your hips while keeping your chest tall and knees tracking over your toes. Drive straight back up.",
-            apt: "Holding the weight in front acts as a counterbalance that naturally keeps your pelvis neutral and core engaged.",
-            video: "https://www.youtube.com/results?search_query=goblet+squat+proper+form"
-          },
-          {
-            id: "d6e2", name: "Romanian Deadlifts (RDL)", machine: "Dumbbells", sets: 3, reps: "10-12 Reps", type: "pull",
-            setup: "Stand tall holding dumbbells against the front of your thighs. Unlock your knees slightly (15-degree bend).",
-            exec: "Push your hips straight backward toward the wall behind you while sliding the dumbbells down your shins. Drive hips forward and squeeze glutes.",
-            apt: "Keep your spine neutral and chin tucked; stop at full hip extension at the top without leaning backward.",
-            video: "https://www.youtube.com/results?search_query=dumbbell+romanian+deadlift+form"
-          },
-          {
-            id: "d6e3", name: "Bulgarian Split Squats", machine: "Dumbbells + Flat Bench", sets: 3, reps: "10 Reps / Leg", type: "press",
-            setup: "Stand 2 feet in front of a flat bench and rest the top of your back foot on the bench.",
-            exec: "Lower your back knee toward the floor with a slight 15-degree forward torso lean to load the front glute, then drive through your front heel.",
-            apt: "While the front glute works, the rear leg's hip flexor gets an active eccentric stretch!",
-            video: "https://www.youtube.com/results?search_query=bulgarian+split+squat+glute+focus+form"
-          },
-          {
-            id: "d6e4", name: "Hip Thrusts", machine: "Barbell / Glute Drive Machine", sets: 3, reps: "12-15 Reps", type: "tilt",
-            setup: "Rest your upper back (bottom of shoulder blades) against a bench with a padded barbell or machine belt across your hips.",
-            exec: "Keep your chin tucked and eyes forward. Drive through your heels to lift your hips until your thighs are parallel to the floor. Hold 2s.",
-            apt: "Keeping your chin tucked and ribs down prevents your lower back from arching and forces 100% glute activation.",
-            video: "https://www.youtube.com/results?search_query=barbell+hip+thrust+proper+form"
-          },
-          {
-            id: "d6e5", name: "Half-Kneeling Hip Flexor Stretch", machine: "Floor Mat (APT Correction)", sets: 3, reps: "60 Sec / Leg", type: "tilt",
-            setup: "Kneel on one knee (use a folded mat under your knee) with your other foot planted in front at 90 degrees.",
-            exec: "Tuck your tailbone under (posterior tilt) and squeeze the glute of the kneeling leg hard. Gently shift forward 2 inches while keeping torso vertical.",
-            apt: "Never lean way forward and arch your lower back—tucking the pelvis first is what actually stretches the tight psoas/hip flexor.",
-            video: "https://www.youtube.com/results?search_query=half+kneeling+hip+flexor+stretch+posterior+pelvic+tilt"
-          }
-        ]
-      }
-    ];
-
-    const START_DATE = new Date("2026-10-20T00:00:00");
-    let currentDateStr = new Date().toISOString().split("T")[0];
-    if (currentDateStr < "2026-10-20") currentDateStr = "2026-10-20";
-    let selectedWorkoutDay = 1;
-
-    function getStoreKey(dateStr) { return `apt_tracker_${dateStr}`; }
-
-    function loadDayState(dateStr) {
-      const raw = localStorage.getItem(getStoreKey(dateStr));
-      if (raw) return JSON.parse(raw);
-      return {
-        scheduleDone: {},
-        setsDone: {},
-        mealsDone: {},
-        mealOptionSelected: { m1: 0, m2: 0, m3: 0, m4: 0, m5: 0, m6: 0 },
-        waterLiters: 0,
-        weight: "",
-        bf: ""
-      };
-    }
-
-    function saveDayState(dateStr, state) {
-      localStorage.setItem(getStoreKey(dateStr), JSON.stringify(state));
-      updateTopDashboard();
-    }
-
-    function initApp() {
-      const picker = document.getElementById("datePicker");
-      picker.value = currentDateStr;
-      picker.addEventListener("change", (e) => {
-        currentDateStr = e.target.value;
-        renderAll();
-      });
-      const dow = new Date(currentDateStr).getDay();
-      selectedWorkoutDay = dow === 0 ? 4 : dow;
-      renderAll();
-    }
-
-    function renderAll() {
-      renderDaySelector();
-      renderWorkoutList();
-      renderScheduleList();
-      renderDietList();
-      renderMetricsView();
-      updateTopDashboard();
-    }
-
-    function updateTopDashboard() {
-      const state = loadDayState(currentDateStr);
-      const d = new Date(currentDateStr + "T00:00:00");
-      const diff = Math.max(1, Math.min(92, Math.floor((d - START_DATE) / (1000 * 60 * 60 * 24)) + 1));
-      document.getElementById("dayBadge").textContent = `Day ${diff} of 92 • Target: Jan 20`;
-
-      let proteinEaten = 0, totalTargetProtein = 0, dayCost = 0, mealsCompleted = 0;
-      DIET_DATA.forEach(m => {
-        const optIdx = state.mealOptionSelected[m.id] || 0;
-        const opt = m.options[optIdx];
-        totalTargetProtein += opt.protein;
-        dayCost += m.cost;
-        if (state.mealsDone[m.id]) {
-          proteinEaten += opt.protein;
-          mealsCompleted++;
-        }
-      });
-
-      const schedDoneCount = Object.values(state.scheduleDone).filter(Boolean).length;
-      const currentWDay = WORKOUT_DAYS.find(w => w.day === selectedWorkoutDay);
-      let exCompleted = 0;
-      currentWDay.exercises.forEach(ex => {
-        if ((state.setsDone[ex.id] || 0) >= ex.sets) exCompleted++;
-      });
-
-      const totalTasks = SCHEDULE_DATA.length + DIET_DATA.length + currentWDay.exercises.length;
-      const doneTasks = schedDoneCount + mealsCompleted + exCompleted;
-      const pct = Math.round((doneTasks / totalTasks) * 100);
-
-      document.getElementById("statCompletion").textContent = `${pct}%`;
-      document.getElementById("statProtein").textContent = `${proteinEaten}g / ${totalTargetProtein}g`;
-      document.getElementById("statWater").textContent = `${state.waterLiters.toFixed(2)} / 3.5L`;
-      document.getElementById("statCost").textContent = `₹${dayCost}`;
-      document.getElementById("monthlyBudgetDisplay").textContent = `₹${dayCost * 30} / ₹10k`;
-      document.getElementById("workoutProgressLabel").textContent = `${exCompleted}/${currentWDay.exercises.length} Done`;
-    }
-
-    function renderDaySelector() {
-      const container = document.getElementById("daySelector");
-      container.innerHTML = WORKOUT_DAYS.map(w => {
-        const active = w.day === selectedWorkoutDay;
-        return `
-          <button onclick="selectWorkoutDay(${w.day})"
-            class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
-              active ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow' : 'bg-slate-800/90 text-slate-300 border-slate-700'
-            }">
-            ${w.name}
-          </button>
-        `;
-      }).join("");
-    }
-
-    function selectWorkoutDay(dayNum) {
-      selectedWorkoutDay = dayNum;
-      renderDaySelector();
-      renderWorkoutList();
-      updateTopDashboard();
-    }
-
-    function renderWorkoutList() {
-      const state = loadDayState(currentDateStr);
-      const dayObj = WORKOUT_DAYS.find(w => w.day === selectedWorkoutDay);
-      const container = document.getElementById("exerciseList");
-
-      container.innerHTML = dayObj.exercises.map(ex => {
-        const completedSets = state.setsDone[ex.id] || 0;
-        const isAllDone = completedSets >= ex.sets;
-        let setButtons = "";
-        for (let i = 1; i <= ex.sets; i++) {
-          const setDone = i <= completedSets;
-          setButtons += `
-            <button onclick="toggleSet('${ex.id}', ${i})"
-              class="flex-1 py-2 rounded-lg text-xs font-bold border transition ${
-                setDone ? 'bg-emerald-500/25 border-emerald-500 text-emerald-300' : 'bg-slate-800 border-slate-700 text-slate-400'
-              }">
-              ${setDone ? '✓ ' : ''}Set ${i}
-            </button>
-          `;
-        }
-
-        return `
-          <div class="bg-slate-900 border ${isAllDone ? 'border-emerald-500/50' : 'border-slate-800'} rounded-xl p-3.5 space-y-2.5">
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                  ${ex.machine}
-                </span>
-                <h3 class="text-base font-extrabold text-white mt-1">${ex.name}</h3>
-                <p class="text-xs text-slate-400">${ex.sets} Sets × ${ex.reps}</p>
-              </div>
-              <button onclick="openTutorial('${ex.id}')"
-                class="shrink-0 bg-slate-800 active:bg-slate-600 text-emerald-400 border border-emerald-500/40 rounded-lg px-2.5 py-1.5 text-xs font-bold flex items-center gap-1">
-                <span>🎥</span> Tutorial & Form
-              </button>
-            </div>
-            <div class="bg-amber-500/10 border border-amber-500/20 rounded-lg px-2.5 py-1.5 text-[11px] text-amber-200">
-              <strong class="text-amber-400">APT Cue:</strong> ${ex.apt}
-            </div>
-            <div class="flex gap-2 pt-1">${setButtons}</div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function toggleSet(exId, setNumber) {
-      const state = loadDayState(currentDateStr);
-      const current = state.setsDone[exId] || 0;
-      state.setsDone[exId] = (current === setNumber) ? setNumber - 1 : setNumber;
-      saveDayState(currentDateStr, state);
-      renderWorkoutList();
-    }
-
-    function renderScheduleList() {
-      const state = loadDayState(currentDateStr);
-      const container = document.getElementById("scheduleList");
-      container.innerHTML = SCHEDULE_DATA.map(item => {
-        const done = !!state.scheduleDone[item.id];
-        return `
-          <div onclick="toggleSchedule('${item.id}')"
-            class="cursor-pointer bg-slate-900 border ${done ? 'border-emerald-500/50 bg-emerald-950/15' : 'border-slate-800'} rounded-xl p-3 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="w-6 h-6 rounded-full flex items-center justify-center border ${
-                done ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-bold' : 'border-slate-600 text-transparent'
-              }">✓</div>
-              <div>
-                <span class="text-[11px] font-bold text-emerald-400 block">${item.time}</span>
-                <h4 class="text-sm font-bold ${done ? 'line-through text-slate-400' : 'text-white'}">${item.title}</h4>
-                <p class="text-xs text-slate-400">${item.detail}</p>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function toggleSchedule(id) {
-      const state = loadDayState(currentDateStr);
-      state.scheduleDone[id] = !state.scheduleDone[id];
-      saveDayState(currentDateStr, state);
-      renderScheduleList();
-    }
-
-    function addWater(amount) {
-      const state = loadDayState(currentDateStr);
-      state.waterLiters = Math.min(6, (state.waterLiters || 0) + amount);
-      saveDayState(currentDateStr, state);
-    }
-
-    function renderDietList() {
-      const state = loadDayState(currentDateStr);
-      const container = document.getElementById("dietList");
-
-      container.innerHTML = DIET_DATA.map(meal => {
-        const selectedIdx = state.mealOptionSelected[meal.id] || 0;
-        const chosenOpt = meal.options[selectedIdx];
-        const done = !!state.mealsDone[meal.id];
-
-        const optionPills = meal.options.map((opt, idx) => `
-          <button onclick="selectMealOption('${meal.id}', ${idx})"
-            class="flex-1 py-1.5 rounded-lg text-[11px] font-bold border transition ${
-              idx === selectedIdx ? 'bg-blue-500/25 border-blue-400 text-blue-300' : 'bg-slate-800 border-slate-700 text-slate-400'
-            }">
-            Option ${idx + 1} (${opt.protein}g P)
-          </button>
-        `).join("");
-
-        return `
-          <div class="bg-slate-900 border ${done ? 'border-emerald-500/50' : 'border-slate-800'} rounded-xl p-3.5 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-[11px] font-bold text-emerald-400">${meal.time} • ${meal.prep}</span>
-                <h3 class="text-base font-extrabold text-white">${meal.meal}</h3>
-              </div>
-              <button onclick="toggleMealDone('${meal.id}')"
-                class="px-3 py-1.5 rounded-lg text-xs font-bold border ${
-                  done ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800 text-slate-300 border-slate-700'
-                }">
-                ${done ? '✓ Eaten' : 'Mark Eaten'}
-              </button>
-            </div>
-            <div class="flex gap-1.5">${optionPills}</div>
-            <div class="bg-slate-800/70 rounded-lg p-2.5 border border-slate-700/60">
-              <div class="flex justify-between items-center text-xs font-bold text-white">
-                <span>${chosenOpt.name}</span>
-                <span class="text-blue-400">${chosenOpt.protein}g Protein</span>
-              </div>
-              <p class="text-xs text-slate-300 mt-1">${chosenOpt.desc}</p>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function selectMealOption(mealId, optIdx) {
-      const state = loadDayState(currentDateStr);
-      state.mealOptionSelected[mealId] = optIdx;
-      saveDayState(currentDateStr, state);
-      renderDietList();
-    }
-
-    function toggleMealDone(mealId) {
-      const state = loadDayState(currentDateStr);
-      state.mealsDone[mealId] = !state.mealsDone[mealId];
-      saveDayState(currentDateStr, state);
-      renderDietList();
-    }
-
-    function getAnimatedSvg(type) {
-      if (type === "press") {
-        return `
-          <svg viewBox="0 0 220 130" class="w-48 h-36">
-            <rect x="20" y="95" width="180" height="8" rx="4" fill="#334155"/>
-            <line x1="65" y1="30" x2="65" y2="95" stroke="#475569" stroke-width="4"/>
-            <line x1="155" y1="30" x2="155" y2="95" stroke="#475569" stroke-width="4"/>
-            <g class="anim-press">
-              <line x1="40" y1="50" x2="180" y2="50" stroke="#10b981" stroke-width="5" stroke-linecap="round"/>
-              <rect x="48" y="36" width="12" height="28" rx="3" fill="#3b82f6"/>
-              <rect x="160" y="36" width="12" height="28" rx="3" fill="#3b82f6"/>
-              <path d="M110 22 L103 32 L117 32 Z" fill="#10b981"/>
-            </g>
-            <text x="110" y="118" text-anchor="middle" fill="#94a3b8" font-size="10">Concentric Press Up • 3s Lower</text>
-          </svg>
-        `;
-      } else if (type === "pull") {
-        return `
-          <svg viewBox="0 0 220 130" class="w-48 h-36">
-            <line x1="40" y1="20" x2="180" y2="20" stroke="#475569" stroke-width="6" stroke-linecap="round"/>
-            <line x1="110" y1="20" x2="110" y2="75" stroke="#64748b" stroke-width="2" stroke-dasharray="4 2"/>
-            <g class="anim-pull">
-              <line x1="60" y1="55" x2="160" y2="55" stroke="#3b82f6" stroke-width="6" stroke-linecap="round"/>
-              <path d="M110 85 L102 73 L118 73 Z" fill="#10b981"/>
-            </g>
-            <text x="110" y="115" text-anchor="middle" fill="#94a3b8" font-size="10">Depress Scapula • Drive Elbows Down</text>
-          </svg>
-        `;
-      } else {
-        return `
-          <svg viewBox="0 0 220 130" class="w-48 h-36">
-            <line x1="20" y1="95" x2="200" y2="95" stroke="#475569" stroke-width="4"/>
-            <g class="anim-tilt">
-              <ellipse cx="110" cy="65" rx="45" ry="18" fill="#10b981" fill-opacity="0.25" stroke="#10b981" stroke-width="3"/>
-              <line x1="75" y1="65" x2="145" y2="65" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
-            </g>
-            <text x="110" y="115" text-anchor="middle" fill="#fbbf24" font-size="10">Posterior Pelvic Tuck (Flatten Lumbar)</text>
-          </svg>
-        `;
-      }
-    }
-
-    function openTutorial(exId) {
-      let found = null;
-      WORKOUT_DAYS.forEach(d => {
-        d.exercises.forEach(e => { if (e.id === exId) found = e; });
-      });
-      if (!found) return;
-
-      document.getElementById("modalMachine").textContent = found.machine;
-      document.getElementById("modalTitle").textContent = `${found.name} (${found.sets} × ${found.reps})`;
-      document.getElementById("modalSvgContainer").innerHTML = getAnimatedSvg(found.type);
-      document.getElementById("modalAnimCaption").textContent =
-        found.type === "tilt"
-          ? "Animated Posture Guide: Tuck tailbone under & flatten lower back"
-          : "Animated Tempo Guide: 1s concentric drive, 1s squeeze, 3s eccentric negative";
-      document.getElementById("modalSetup").textContent = found.setup;
-      document.getElementById("modalExecution").textContent = found.exec;
-      document.getElementById("modalAptCue").textContent = found.apt;
-      document.getElementById("modalVideoBtn").href = found.video;
-      document.getElementById("tutorialModal").classList.remove("hidden");
-    }
-
-    function closeModal() {
-      document.getElementById("tutorialModal").classList.add("hidden");
-    }
-
-    function saveMetrics() {
-      const state = loadDayState(currentDateStr);
-      state.weight = document.getElementById("inputWeight").value;
-      state.bf = document.getElementById("inputBF").value;
-      saveDayState(currentDateStr, state);
-      renderMetricsView();
-    }
-
-    function renderMetricsView() {
-      const state = loadDayState(currentDateStr);
-      document.getElementById("inputWeight").value = state.weight || "";
-      document.getElementById("inputBF").value = state.bf || "";
-
-      const logs = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith("apt_tracker_")) {
-          const dStr = k.replace("apt_tracker_", "");
-          const val = JSON.parse(localStorage.getItem(k));
-          if (val.weight || val.bf) {
-            logs.push({ date: dStr, weight: val.weight, bf: val.bf });
-          }
-        }
-      }
-      logs.sort((a, b) => b.date.localeCompare(a.date));
-
-      const listEl = document.getElementById("weightHistoryList");
-      if (logs.length === 0) {
-        listEl.innerHTML = `<p class="text-slate-500">No check-ins saved yet. Log your 80 kg starting baseline above!</p>`;
-      } else {
-        listEl.innerHTML = logs.map(l => `
-          <div class="flex justify-between bg-slate-800/70 px-3 py-2 rounded-lg border border-slate-700/60">
-            <span class="font-bold text-white">${l.date}</span>
-            <span class="text-emerald-400 font-bold">${l.weight ? l.weight + ' kg' : '-'} ${l.bf ? '• ' + l.bf + '% BF' : ''}</span>
-          </div>
-        `).join("");
-      }
-    }
-
-    function switchTab(tab) {
-      ["workout", "schedule", "diet", "metrics"].forEach(t => {
-        document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tab);
-        const navBtn = document.getElementById(`nav-${t}`);
-        navBtn.className = (t === tab)
-          ? "flex flex-col items-center text-emerald-400 font-bold text-xs py-1"
-          : "flex flex-col items-center text-slate-400 font-medium text-xs py-1";
-      });
-    }
-
-    initApp();
-  </script>
+  <!-- Data first, then the figure engine, then storage, then the app (which boots) -->
+  <script src="js/data-plan.js"></script>
+  <script src="js/data-schedule.js"></script>
+  <script src="js/data-workouts.js"></script>
+  <script src="js/data-diet.js"></script>
+  <script src="js/data-apt.js"></script>
+  <script src="js/figure.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

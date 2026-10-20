@@ -1,10 +1,18 @@
-const CACHE_NAME = "apt-tracker-v2";
+const CACHE_NAME = "apt-tracker-v3";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./js/data-plan.js",
+  "./js/data-schedule.js",
+  "./js/data-workouts.js",
+  "./js/data-diet.js",
+  "./js/data-apt.js",
+  "./js/figure.js",
+  "./js/store.js",
+  "./js/app.js"
 ];
 
 self.addEventListener("install", (event) => {
@@ -24,6 +32,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
