@@ -1,10 +1,10 @@
 {
-  "id": "/index.html",
+  "id": "./",
   "name": "90-Day Transformation & APT Tracker",
   "short_name": "90DayFit",
   "description": "Cult Gym 6-Day Split, APT Posture Fix, and No-Cook PG Veg Diet Tracker",
-  "start_url": "/index.html",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#090d16",
